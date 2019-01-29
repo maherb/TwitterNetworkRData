@@ -1,28 +1,32 @@
 #' Fetches tweet from database.
 #'
-#' @param ??
+#' @param Rdata_file Path to an Rdata file.
+#' @param name Name of the dataframe the Rdata file contains
 #' @return Dataframe of tweet data.
-fetchData <- function() {
-  # TODO: Need more information about fetching data and format
+fetchData <- function(Rdata_file, name) {
+  load(Rdata_file)
+  # Convert hashtag column to better format
+  data$hashtags <- lapply(data$hashtags, function(x) {
+    unlist(x)
+  })
+  # TODO: Issues with determining dataframe after loading in Rdata
 }
 
 #' Gets subset of data.
 #'
 #' @param data Dataframe with tweet data.
 #' @param subset_query String to base subset from.
-#' @param subset_type String type of query. Can be hashtags, screen_name, mentions_screen_name, word. 
+#' @param subset_type String type of query. Can be hashtag, screen_name, mentions_screen_name, word. 
 #' @return Subset of main data based on query and type.
 getSubset <- function(data, subset_query, subset_type) {
   subset_query <- toupper(subset_query)
-  if(subset_type == "hashtags") {
-    data_subset <- filter(data, toupper(data$hashtags) %in% subset_query)
-  } else if(subset_type == "screen_name") {
-    data_subset <- filter(data, toupper(data$screen_name) %in% subset_query)
-  } else if(subset_type == "mentions_screen_name") {
-    data_subset <- filter(data, toupper(data$mentions_screen_name) %in% subset_query)
-  } else if(subset_type == "text") {
-    # TODO: Text processing
-  }
+  data_subset = NULL
+  switch(subset_type,
+    "hashtag" = data_subset <- filter(data, toupper(data$hashtags) %in% subset_query),
+    "screen_name" = data_subset <- filter(data, toupper(data$user_screen_name) %in% subset_query),
+    "mentions_screen_name" = data_subset <- filter(data, toupper(data$mentions_screen_name) %in% subset_query),
+    "text" #TODO: text processing
+    )
   return(data_subset)
 }
 
@@ -62,22 +66,12 @@ getNode <- function(data, node_query, node_type, node_name) {
   return(node)
 }
 
-#' Joins together list of nodes into one dataframe.
-#' 
-#' @param nodes_list list of node dataframes to join in their list order.
-#' @return Node dataframes joined into one dataframe.
-joinNodes <- function(nodes_list) {
-  nodes <- do.call("rbind", nodes_list)
-  nodes <- updatePositions(nodes)
-  return(nodes)
-}
-
 #' Updates the x and y values of each node.
 #' 
 #' @param nodes Single dataframe of node data.
 #' @param nodes_list list of node dataframes.
 #' @returns Dataframe of node data with correct positions.
-updatePositons <- function(nodes, nodes_list) {
+updatePositions <- function(nodes, nodes_list) {
   radius <- 5
   scale <- 75
   angles <- rev(seq(0, (3/2)*pi, (2 * pi)/12))
@@ -88,6 +82,16 @@ updatePositons <- function(nodes, nodes_list) {
       nodes$y[i] <- -scale * radius * sin(angles[[i]])
     }
   }
+  return(nodes)
+}
+
+#' Joins together list of nodes into one dataframe.
+#' 
+#' @param nodes_list list of node dataframes to join in their list order.
+#' @return Node dataframes joined into one dataframe.
+joinNodes <- function(nodes_list) {
+  nodes <- do.call("rbind", nodes_list)
+  nodes <- updatePositions(nodes, nodes_list)
   return(nodes)
 }
 
