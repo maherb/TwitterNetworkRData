@@ -3,13 +3,15 @@
 #' @param Rdata_file Path to an Rdata file.
 #' @param name Name of the dataframe the Rdata file contains
 #' @return Dataframe of tweet data.
-fetchData <- function(Rdata_file, name) {
-  load(Rdata_file)
+fetchData <- function(Rdata_file) {
+  df_name <- load(Rdata_file)
+  data <- eval(parse(text = df_name))
   # Convert hashtag column to better format
   data$hashtags <- lapply(data$hashtags, function(x) {
     unlist(x)
   })
-  # TODO: Issues with determining dataframe after loading in Rdata
+  remove(df_name)
+  return(data)
 }
 
 #' Gets subset of data.
