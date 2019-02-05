@@ -1,19 +1,10 @@
 # Set twitter token, consumer_key and consumer_secret stored in token_info.R file
-source("token_info.R")
-token <- get_bearer_token(consumer_key, consumer_secret)
+#source("token_info.R")
+#token <- get_bearer_token(consumer_key, consumer_secret)
 
 # Default search queries for startup. Used for the controller text box, default value for queries_string.
-default_queries <- paste(c("#DataScience",
-                           "#DataAnalytics",
-                           "#DataAnalysis",
-                           "#MachineLearning",
-                           "#DeepLearning",
-                           "#BigData",
-                           "#data",
-                           "#Programming",
-                           "#Math",
-                           "#rstats"),
-                         collapse = " ")
+default_queries <- paste(#c("#retweet", "#nypd"),
+  c("#1", "#2"), collapse = " ")
 
 # MW Shiny ----------------------------------------------------------------
 
@@ -96,34 +87,34 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
       #   Text file is chosen on controller. 
       updateValues()
       serverValues$queries <- read.table(serverValues$file$datapath, header = FALSE,
-                         comment.char = "", stringsAsFactors = FALSE)$V1
+                                         comment.char = "", stringsAsFactors = FALSE)$V1
     })
     
     # Actions to be taken when edge or node selection is changed
     observeEvent(c(
       input$current_node_id,
       input$current_edge_index
-      ), {
-        # Update the information on the external monitor.
-        #
-        # Event:
-        #   Selected node id is changed
-        #   Selected edge index is changed
-        updateValues()
-        # When neither an edge or node is selected 
-        if(serverValues$current_node_id == -1 && serverValues$current_edge_index == -1){
-          serverValues$data_subset <- NULL
+    ), {
+      # Update the information on the external monitor.
+      #
+      # Event:
+      #   Selected node id is changed
+      #   Selected edge index is changed
+      updateValues()
+      # When neither an edge or node is selected 
+      if(serverValues$current_node_id == -1 && serverValues$current_edge_index == -1){
+        serverValues$data_subset <- NULL
         # When node is selected
-        } else if(serverValues$current_node_id != -1) {
-          query <- serverValues$current_node_id
-          serverValues$data_subset <- getDataSubset(serverValues$data, query)
+      } else if(serverValues$current_node_id != -1) {
+        query <- serverValues$current_node_id
+        serverValues$data_subset <- getDataSubset(serverValues$data, query)
         # When edge is selected
-        } else if(serverValues$current_edge_index != -1) {
-          edge <- serverValues$edges[serverValues$edges$index == serverValues$current_edge_index, ]
-          query <- c(as.character(edge$to), as.character(edge$from))
-          serverValues$data_subset <- getDataSubset(serverValues$data, query)
-        } 
-      })
+      } else if(serverValues$current_edge_index != -1) {
+        edge <- serverValues$edges[serverValues$edges$index == serverValues$current_edge_index, ]
+        query <- c(as.character(edge$to), as.character(edge$from))
+        serverValues$data_subset <- getDataSubset(serverValues$data, query)
+      } 
+    })
     
     # Observe when a node is chosen to be deleted after a doubleclick, the
     # remove the data associated
@@ -137,7 +128,7 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
       serverValues$queries[index] <- NA
       serverValues$data_subset <- NULL
       serverValues$data <- serverValues$data %>%
-                             filter(query != serverValues$delete_node)
+        filter(query != serverValues$delete_node)
       serverValues$col_list <- UpdateWall(serverValues$data, serverValues$queries)
     })
     
@@ -205,12 +196,12 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
         serverValues$queries <- c(serverValues$queries, serverValues$current_node_id)
         serverValues$queries[[from_index]] <- NA
         serverValues$col_list[[from_index]] <- column(width = 1,
-                                                     textInput(paste0("text.column.", from_index), label = ""),
-                                                     actionButton(paste0("button.column.", from_index), "Submit"))
-    
+                                                      textInput(paste0("text.column.", from_index), label = ""),
+                                                      actionButton(paste0("button.column.", from_index), "Submit"))
         
         
-      # Normal movement, when both nodes are on the edge  
+        
+        # Normal movement, when both nodes are on the edge  
       } else if(start_distance >= 187 && end_distance >= 187) {
         # Change the position of the node moved onto
         if(from_index != new_index) {
@@ -222,7 +213,7 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
           serverValues$col_list[[from_index]] <- to_col
         }
         
-      # Move two nodes in the center  
+        # Move two nodes in the center  
       } else {
         # Do nothing
       }
@@ -367,4 +358,4 @@ campfireUI = function(controller, wall, floor, datamonitor, urlmonitor) {
     ))
   
   return(ui)
-}
+  }

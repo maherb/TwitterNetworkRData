@@ -10,17 +10,23 @@ getData <- function(queries, num_tweets, include_rts, token, type) {
   #
   # Returns:
   #   Tibble of tweet search results.
-  queries <- lapply(queries[!is.na(queries)], function(query) {
-    split <- strsplit(query, "\\* ")[[1]]
-    if(length(split) == 2) {
-      split[2]
-    } else {
-      query
-    }
-  })
-  data <- search_tweets2(queries, n = num_tweets, include_rts = include_rts,
-                         token = token, type = type, lang = "en", verbose = TRUE)
-  return(data)
+  #queries <- lapply(queries[!is.na(queries)], function(query) {
+  #  split <- strsplit(query, "\\* ")[[1]]
+  #  if(length(split) == 2) {
+  #    split[2]
+  #  } else {
+  #    query
+  #  }
+  #})
+  #data <- search_tweets2(queries, n = num_tweets, include_rts = include_rts,
+  #                       token = token, type = type, lang = "en", verbose = TRUE)
+  #return(data)
+  df_file <- "period_2.df.Rdata"
+  name <- load(df_file)
+  loaded_df <- eval(parse(text = name))
+  loaded_df$query <- as.character(loaded_df$group)
+  return(loaded_df)
+  
 }
 
 getDataSubset <- function(data, subset_queries) {
@@ -35,12 +41,14 @@ getDataSubset <- function(data, subset_queries) {
   #   Tibble only including unique tweets with the queries in subset_query
   if(length(subset_queries) == 1) {
     filter(data, query %in% subset_queries) %>%
-      distinct(status_id, .keep_all = TRUE)
+      distinct(id_str, .keep_all = TRUE)
   } else {
     filter(data, query %in% subset_queries) %>%
-      group_by(status_id) %>%
+      #group_by(status_id) %>%
+      group_by(id_str) %>%
       filter(n() > 1) %>%
       ungroup() %>%
-      distinct(status_id, .keep_all = TRUE)
+      #distinct(status_id, .keep_all = TRUE)
+      distinct(id_str, .keep_all = TRUE)
   }
 }
