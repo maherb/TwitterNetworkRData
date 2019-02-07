@@ -23,16 +23,15 @@ if (!require("useful")) {
   library(useful)
 }
 
-#source("app-only-auth-twitter.R")
-source("data.R")
-source("floor.R")
-source("wall.R")
-source("external-monitor.R")
-source("utilities.R")
-source("campfire_lib.R")
+#source("app-only-auth-twitter.R")b
+source("src/data.R")
+source("src/floor.R")
+source("src/wall.R")
+source("src/external-monitor.R")
+source("src/utilities.R")
+source("src/campfire_lib.R")
 
 campfireApp(
-  
   controller = div(
     h1("Controller"),
     textAreaInput("queries_string", "Search Queries", default_queries, height = '200px'),

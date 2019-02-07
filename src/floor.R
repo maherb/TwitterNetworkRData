@@ -163,7 +163,7 @@ getToFrom <- function(data) {
   #   Data frame in the format:
   #     to  from  index  color 
   cleaned <- data %>%
-    group_by(status_id) %>%
+    group_by(id_str) %>%
     filter(n() > 1)
   if(nrow(cleaned) == 0) {
     edges <- NULL

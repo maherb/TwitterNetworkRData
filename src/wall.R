@@ -43,15 +43,15 @@ UpdateColumn <- function(data_subset, current_node_data, queries) {
                   overflow-x: hidden;',
                            if(nrow(data_subset) > 0) {
                              lapply(1:nrow(data_subset), function(tweet_num) {
-                               colored.text <- colorHashtags(data_subset$text[[tweet_num]],
-                                                             queries,
-                                                             data_subset$hashtags[[tweet_num]],
-                                                             c(data_subset$urls_t.co[[tweet_num]], data_subset$ext_media_t.co[[tweet_num]]),
-                                                             data_subset$mentions_screen_name[[tweet_num]])
+                               #colored.text <- colorHashtags(data_subset$text[[tweet_num]],
+                               #                               queries,
+                               #                              data_subset$hashtags[[tweet_num]],
+                               #                               c(data_subset$urls_t.co[[tweet_num]], data_subset$ext_media_t.co[[tweet_num]]),
+                               #                              data_subset$mentions_screen_name[[tweet_num]])
                                tags$div(style = 'padding: 0px;',
-                                        tags$h3(tags$span(class = "clickable", paste0("@", data_subset$screen_name[[tweet_num]]))),
-                                        tags$p(HTML(colored.text)),
-                                        tags$p(HTML(paste("&#x1F499", data_subset$favorite_count[[tweet_num]], "&#x1F504", data_subset$retweet_count[[tweet_num]])))
+                                        tags$h3(tags$span(class = "clickable", paste0("@", data_subset$screen_name[tweet_num]))),
+                                        tags$p(HTML(data_subset$full_text[tweet_num])),
+                                        tags$p(HTML(paste("&#x1F499", data_subset$favorite_count[tweet_num], "&#x1F504", data_subset$retweet_count[tweet_num])))
                                )
                              })
                            }

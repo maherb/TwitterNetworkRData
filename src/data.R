@@ -21,7 +21,7 @@ getData <- function(queries, num_tweets, include_rts, token, type) {
   #data <- search_tweets2(queries, n = num_tweets, include_rts = include_rts,
   #                       token = token, type = type, lang = "en", verbose = TRUE)
   #return(data)
-  df_file <- "period_2.df.Rdata"
+  df_file <- "data/period_5.df.Rdata"
   name <- load(df_file)
   loaded_df <- eval(parse(text = name))
   loaded_df$query <- as.character(loaded_df$group)
