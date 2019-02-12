@@ -9,8 +9,8 @@ updateWall <- function(data, nodes) {
   #
   # Returns:
   #   List of Shiny HTML columns containing tweet data.
-  col_list <- vector("list", 12)
-  col_list <- lapply(1:12, function(col_num) {
+  col_list <- vector("list", num_cols)
+  col_list <- lapply(1:num_cols, function(col_num) {
     if(!(col_num %in% nodes$position_)) {
       column(width = 1,
              textInput(paste0("text.column.", col_num), label = ""),

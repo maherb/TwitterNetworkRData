@@ -31,6 +31,8 @@ source("src/external-monitor.R")
 source("src/utilities.R")
 source("src/campfire_lib.R")
 
+num_cols <- 10
+
 campfireApp(
   controller = div(
     h1("Controller"),
@@ -68,7 +70,7 @@ campfireApp(
   
   datamonitor = div(fluidPage(
     fluidRow(
-      column(12,
+      column(num_cols,
              uiOutput("tweets_info")
       )
     )),
@@ -187,7 +189,7 @@ campfireApp(
     });"
         )),
         fluidRow(
-          lapply(1:12, function(col.num) {
+          lapply(1:num_cols, function(col.num) {
             serverValues$col_list[[col.num]] 
           })
         )

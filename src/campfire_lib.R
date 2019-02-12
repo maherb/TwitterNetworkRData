@@ -4,7 +4,7 @@
 
 # Default search queries for startup. Used for the controller text box, default value for queries_string.
 default_queries <- paste(#c("#retweet", "#nypd"),
-  c("1", "2"), collapse = " ")
+  c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10"), collapse = " ")
 
 # MW Shiny ----------------------------------------------------------------
 
