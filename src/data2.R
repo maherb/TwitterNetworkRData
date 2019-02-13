@@ -28,7 +28,7 @@ getSubset <- function(data, subset_query, subset_type) {
     "hashtag" = data_subset <- filter(data, toupper(data$hashtags) %in% subset_query),
     "screen_name" = data_subset <- filter(data, toupper(data$user_screen_name) %in% subset_query),
     "mentions_screen_name" = data_subset <- filter(data, toupper(data$mentions_screen_name) %in% subset_query),
-    "group" = data_subset <- data[data$group == 1, ],
+    "group" = data_subset <- data[data$group == subset_query, ],
     "text" #TODO: text processing
     )
   return(data_subset)
@@ -67,7 +67,6 @@ getNode <- function(data, node_query, node_type, node_name) {
                       x = 0,
                       y = 0,
                       type = node_type,
-                      edges = FALSE,
                       stringsAsFactors = FALSE)
   return(node)
 }
@@ -99,6 +98,23 @@ joinNodes <- function(nodes_list) {
   nodes <- do.call("rbind", nodes_list)
   nodes <- updatePositions(nodes, nodes_list)
   return(nodes)
+}
+
+#' Gets nodes to graph in the network.
+#' 
+#'  @param data Dataframe with tweet data.
+#'  @param node_queries Vector of queries to base nodes from.
+#'  @param node_types Vector of node types to base nodes from.
+#'  @param node_names Vector of node names to name nodes.
+#'  @return Node data frame.
+getNodes <- function(data, node_queries, node_types, node_names) {
+  assert_that(length(node_names) == length(node_queries))
+  assert_that(length(node_queries) == length(node_types))
+  nodes_list <- vector(mode = "list", length = length(node_queries))
+  for(i in 1:length(node_queries)) {
+    nodes_list[[i]] = getNode(data, node_queries[i], node_types[i], node_names[i]) 
+  }
+  return(joinNodes(nodes_list))
 }
 
 #' Gets graph node edge between two specific nodes
