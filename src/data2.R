@@ -21,12 +21,14 @@ fetchData <- function(Rdata_file) {
 #' @param subset_type String type of query. Can be hashtag, screen_name, mentions_screen_name, word. 
 #' @return Subset of main data based on query and type.
 getSubset <- function(data, subset_query, subset_type) {
-  subset_query <- toupper(subset_query)
-  data_subset = NULL
+  # subset_query <- toupper(subset_query)
+  assert_that(nrow(data) > 0)
+  assert_that(is.character(subset_type))
   switch(subset_type,
     "hashtag" = data_subset <- filter(data, toupper(data$hashtags) %in% subset_query),
     "screen_name" = data_subset <- filter(data, toupper(data$user_screen_name) %in% subset_query),
     "mentions_screen_name" = data_subset <- filter(data, toupper(data$mentions_screen_name) %in% subset_query),
+    "group" = data_subset <- data[data$group == 1, ],
     "text" #TODO: text processing
     )
   return(data_subset)
@@ -64,7 +66,9 @@ getNode <- function(data, node_query, node_type, node_name) {
                       value = node_value,
                       x = 0,
                       y = 0,
-                      type = node_type)
+                      type = node_type,
+                      edges = FALSE,
+                      stringsAsFactors = FALSE)
   return(node)
 }
 
@@ -78,7 +82,7 @@ updatePositions <- function(nodes, nodes_list) {
   scale <- 75
   angles <- rev(seq(0, (3/2)*pi, (2 * pi)/12))
   angles <- c(angles, seq((3/2)*pi, 2*pi, (2 * pi)/12)[3:2])
-  for(i in 1:min(length(a), 12)) {
+  for(i in 1:min(length(nodes_list), 12)) {
     if(!is.null(nodes_list[[i]])) {
       nodes$x[i] <- scale * radius * cos(angles[[i]])
       nodes$y[i] <- -scale * radius * sin(angles[[i]])
@@ -97,13 +101,57 @@ joinNodes <- function(nodes_list) {
   return(nodes)
 }
 
+#' Gets graph node edge between two specific nodes
+#' 
+#' @param data Dataframe with tweet data.
+#' @param to_node Node information where the edge terminates. Row of nodes dataframe.
+#' @param from_node Node information where the edge originates. Row of nodes dataframe.
+#' @param edge_type Type of the edge. Can be hashtags, screen_name, mentions_screen_name, text. 
+#' @returns Dataframe of one edge.
+getEdge <- function(data, to_node, from_node, edge_type) {
+  to_node_subset <- getSubset(data, to_node$id, to_node$type)
+  from_node_subset <- getSubset(data, from_node$id, from_node$type)
+  switch(edge_type,
+         "hashtag" = {
+                      to_node_hashtags = unique(unlist(to_node_subset$hashtags))
+                      from_node_hashtags = unique(unlist(from_node_subset$hashtags))
+                      size = length(intersect(to_node_hashtags, from_node_hashtags)) 
+         }
+  )
+  edge <- data.frame(to = to_node$id,
+                     from = from_node$id,
+                     value = size)
+  return(edge)
+}
+
 #' Gets graph node edge data from data.
 #' 
 #' @param data Dataframe with tweet data.
 #' @param nodes Dataframe of node data.
-#' @param node_query Node to get edges for.
 #' @param edge_type Type of the edge. Can be hashtags, screen_name, mentions_screen_name, text.
-#' @returns Dataframe of edge data.
-getEdges <- function(data, nodes, node_query, edge_type) {
-  data_subset <- getSubset2(data, )
+#' @returns Dataframe of edge data from ONE specific node.
+getEdges <- function(data, nodes, edge_type) {
+  edges <- data.frame()
+  node_combinations = combn(nodes$id, 2)
+  for(i in 1:ncol(node_combinations)) {
+    edges <- rbind(edges, getEdge(data,
+                                  nodes[nodes$id == node_combinations[ ,i][1], ],
+                                  nodes[nodes$id == node_combinations[ ,i][2], ],
+                                  edge_type))
+  }
+  return(edges)
+}
+
+#' Get visNetwork object for the floor.
+#' 
+#' @param nodes Dataframe of node data.
+#' @param edges Dataframe of edge data.
+getNetwork <- function(nodes, edges) {
+  visNetwork(nodes, edges) %>%
+    visEdges(scaling = list("min" = 0), smooth = list("enabled" = TRUE)) %>%
+    visNodes(scaling = list("min" = 10, "max" = 50)) %>%
+      # After drawing the network, center on 0,0 to keep position
+      # independant of node number
+      visPhysics(stabilization = FALSE, enabled = FALSE) %>%
+      visInteraction(dragView = FALSE, zoomView = FALSE)
 }
