@@ -36,7 +36,7 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
         incProgress(0, detail = "Getting Tweets", session = d)
         ServerValues$data <- fetchData("data/period_5.df.Rdata")
         nodes <- getNodes(ServerValues$data, c(1,NA,2,3), c("group", NA, "group", "group"), c(1,NA,2,3))
-        edges <- getEdges(ServerValues$data, nodes, "hashtag")
+        edges <- getEdges(ServerValues$data, nodes, ServerValues$edge_type)
         ServerValues$network <- getNetwork(nodes, edges)
         
         # ServerValues$data <- getData(serverValues$queries,

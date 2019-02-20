@@ -31,10 +31,11 @@ getSubset <- function(data, subset_query, subset_type) {
     "group" = data_subset <- data[data$group == subset_query, ],
     #TODO: text processing
     data_subset <- NULL
-    )
+  )
   return(data_subset)
 }
 
+# TODO: May need to change function, not required currently.
 #' Gets subset of data from multiple queries.
 #'
 #' @param data Dataframe with tweet data.
@@ -145,7 +146,8 @@ getEdge <- function(data, to_node, from_node, edge_type) {
           to_node_tweets = unique(to_node_subset$id_str)  
           from_node_tweets = unique(from_node_subset$id_str)
           size = length(intersect(to_node_tweets, from_node_tweets))
-        }
+        },
+        size = 0
         #TODO: MORE TYPES 
   )
   edge <- data.frame(to = to_node$id,

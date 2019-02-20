@@ -22,7 +22,8 @@ campfireApp(
     # textAreaInput("queries_string", "Search Queries", default_queries, height = '200px'),
     selectInput(inputId = "edge_type",
                 label = "Edge Type:",
-                choices = list("hashtags", "tweets")
+                choices = list("hashtag", "tweet"),
+                selected = "hashtag"
                 ),
     actionButton(inputId = "update",
                  label = "Update"),
