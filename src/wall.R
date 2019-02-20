@@ -23,6 +23,9 @@ updateWall <- function(data, nodes) {
   })
 }
 
+
+
+
 UpdateColumn <- function(data_subset, current_node_data, queries) {
   # Creates a single Shiny HTMl column containing tweet data for specific single query.
   # 

@@ -23,13 +23,14 @@ fetchData <- function(Rdata_file) {
 getSubset <- function(data, subset_query, subset_type) {
   # subset_query <- toupper(subset_query)
   assert_that(nrow(data) > 0)
-  assert_that(is.character(subset_type))
+  subset_type <- toString(subset_type)
   switch(subset_type,
     "hashtag" = data_subset <- filter(data, toupper(data$hashtags) %in% subset_query),
     "screen_name" = data_subset <- filter(data, toupper(data$user_screen_name) %in% subset_query),
     "mentions_screen_name" = data_subset <- filter(data, toupper(data$mentions_screen_name) %in% subset_query),
     "group" = data_subset <- data[data$group == subset_query, ],
-    "text" #TODO: text processing
+    #TODO: text processing
+    data_subset <- NULL
     )
   return(data_subset)
 }
@@ -55,19 +56,26 @@ getSubset2 <- function(data, subset_queries, subset_types) {
 #' @param data Dataframe with tweet data.
 #' @param node_query String to base node off of.
 #' @param node_type Type of the node. Can be hashtags, screen_name, mentions_screen_name, text.
+#'                    Also may be NA. 
 #' @param node_name Name of the node.
 #' @return Dataframe of node data for graph. Node is located at (0,0).
 getNode <- function(data, node_query, node_type, node_name) {
-  node_value <- nrow(getSubset(data, node_query, node_type))
+  node_subset <- getSubset(data, node_query, node_type)
+  if(is.null(node_subset)) {
+    node_value <- NA
+  } else {
+    node_value <- nrow(node_subset)
+  }
   node <- data.frame(id = node_query,
-                      label = node_name,
-                      color = color.blue,
-                      font = "10px arial #fd7e14",
-                      value = node_value,
-                      x = 0,
-                      y = 0,
-                      type = node_type,
-                      stringsAsFactors = FALSE)
+                     label = node_name,
+                     color = color.blue,
+                     font = "10px arial #fd7e14",
+                     value = node_value,
+                     x = 0,
+                     y = 0,
+                     type = node_type,
+                     hidden = is.na(node_value),
+                     stringsAsFactors = FALSE)
   return(node)
 }
 
@@ -122,17 +130,23 @@ getNodes <- function(data, node_queries, node_types, node_names) {
 #' @param data Dataframe with tweet data.
 #' @param to_node Node information where the edge terminates. Row of nodes dataframe.
 #' @param from_node Node information where the edge originates. Row of nodes dataframe.
-#' @param edge_type Type of the edge. Can be hashtags, screen_name, mentions_screen_name, text. 
+#' @param edge_type Type of the edge. Can be hashtags, tweet, screen_name, mentions_screen_name, text. 
 #' @returns Dataframe of one edge.
 getEdge <- function(data, to_node, from_node, edge_type) {
   to_node_subset <- getSubset(data, to_node$id, to_node$type)
   from_node_subset <- getSubset(data, from_node$id, from_node$type)
   switch(edge_type,
-         "hashtag" = {
-                      to_node_hashtags = unique(unlist(to_node_subset$hashtags))
-                      from_node_hashtags = unique(unlist(from_node_subset$hashtags))
-                      size = length(intersect(to_node_hashtags, from_node_hashtags)) 
-         }
+        "hashtag" = {
+          to_node_hashtags = unique(unlist(to_node_subset$hashtags))
+          from_node_hashtags = unique(unlist(from_node_subset$hashtags))
+          size = length(intersect(to_node_hashtags, from_node_hashtags))
+        },
+        "tweet" = {
+          to_node_tweets = unique(to_node_subset$id_str)  
+          from_node_tweets = unique(from_node_subset$id_str)
+          size = length(intersect(to_node_tweets, from_node_tweets))
+        }
+        #TODO: MORE TYPES 
   )
   edge <- data.frame(to = to_node$id,
                      from = from_node$id,
@@ -148,11 +162,13 @@ getEdge <- function(data, to_node, from_node, edge_type) {
 #' @returns Dataframe of edge data from ONE specific node.
 getEdges <- function(data, nodes, edge_type) {
   edges <- data.frame()
-  node_combinations = combn(nodes$id, 2)
+  # Take NA nodes out, they interfere with creating edges in the below code.
+  nonNA_nodes <- nodes[!is.na(nodes$id), ]
+  node_combinations = combn(nonNA_nodes$id, 2)
   for(i in 1:ncol(node_combinations)) {
     edges <- rbind(edges, getEdge(data,
-                                  nodes[nodes$id == node_combinations[ ,i][1], ],
-                                  nodes[nodes$id == node_combinations[ ,i][2], ],
+                                  nonNA_nodes[nonNA_nodes$id == node_combinations[ ,i][1], ],
+                                  nonNA_nodes[nonNA_nodes$id == node_combinations[ ,i][2], ],
                                   edge_type))
   }
   return(edges)
