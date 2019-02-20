@@ -55,26 +55,23 @@ getSubset2 <- function(data, subset_queries, subset_types) {
 #' Gets graph node from data.
 #' 
 #' @param data Dataframe with tweet data.
-#' @param node_query String to base node off of.
-#' @param node_type Type of the node. Can be hashtags, screen_name, mentions_screen_name, text.
-#'                    Also may be NA. 
-#' @param node_name Name of the node.
+#' @param node_list Node list, described in utils2.R
 #' @return Dataframe of node data for graph. Node is located at (0,0).
-getNode <- function(data, node_query, node_type, node_name) {
-  node_subset <- getSubset(data, node_query, node_type)
+getNode <- function(data, node_list) {
+  node_subset <- getSubset(data, node_list$query, node_list$type)
   if(is.null(node_subset)) {
     node_value <- NA
   } else {
     node_value <- nrow(node_subset)
   }
-  node <- data.frame(id = node_query,
-                     label = node_name,
+  node <- data.frame(id = node_list$query,
+                     label = node_list$name,
                      color = color.blue,
                      font = "10px arial #fd7e14",
                      value = node_value,
                      x = 0,
                      y = 0,
-                     type = node_type,
+                     type = node_list$type,
                      hidden = is.na(node_value),
                      stringsAsFactors = FALSE)
   return(node)
@@ -83,15 +80,15 @@ getNode <- function(data, node_query, node_type, node_name) {
 #' Updates the x and y values of each node.
 #' 
 #' @param nodes Single dataframe of node data.
-#' @param nodes_list list of node dataframes.
+#' @param node_dfs list of node dataframes.
 #' @returns Dataframe of node data with correct positions.
-updatePositions <- function(nodes, nodes_list) {
+updatePositions <- function(nodes, node_dfs) {
   radius <- 5
   scale <- 75
   angles <- rev(seq(0, (3/2)*pi, (2 * pi)/12))
   angles <- c(angles, seq((3/2)*pi, 2*pi, (2 * pi)/12)[3:2])
-  for(i in 1:min(length(nodes_list), 12)) {
-    if(!is.null(nodes_list[[i]])) {
+  for(i in 1:min(length(node_dfs), 12)) {
+    if(!is.null(node_dfs[[i]])) {
       nodes$x[i] <- scale * radius * cos(angles[[i]])
       nodes$y[i] <- -scale * radius * sin(angles[[i]])
     }
@@ -101,29 +98,25 @@ updatePositions <- function(nodes, nodes_list) {
 
 #' Joins together list of nodes into one dataframe.
 #' 
-#' @param nodes_list list of node dataframes to join in their list order.
+#' @param nodes_dfs list of node dataframes to join in their list order.
 #' @return Node dataframes joined into one dataframe.
-joinNodes <- function(nodes_list) {
-  nodes <- do.call("rbind", nodes_list)
-  nodes <- updatePositions(nodes, nodes_list)
+joinNodes <- function(node_dfs) {
+  nodes <- do.call("rbind", node_dfs)
+  nodes <- updatePositions(nodes, node_dfs)
   return(nodes)
 }
 
 #' Gets nodes to graph in the network.
 #' 
 #'  @param data Dataframe with tweet data.
-#'  @param node_queries Vector of queries to base nodes from.
-#'  @param node_types Vector of node types to base nodes from.
-#'  @param node_names Vector of node names to name nodes.
+#'  @param node_lists Node list, described in utils2.R
 #'  @return Node data frame.
-getNodes <- function(data, node_queries, node_types, node_names) {
-  assert_that(length(node_names) == length(node_queries))
-  assert_that(length(node_queries) == length(node_types))
-  nodes_list <- vector(mode = "list", length = length(node_queries))
-  for(i in 1:length(node_queries)) {
-    nodes_list[[i]] = getNode(data, node_queries[i], node_types[i], node_names[i]) 
+getNodes <- function(data, node_lists) {
+  node_dfs <- vector(mode = "list", length = length(node_lists))
+  for(i in 1:length(node_lists)) {
+    node_dfs[[i]] = getNode(data, node_lists[[i]]) 
   }
-  return(joinNodes(nodes_list))
+  return(joinNodes(node_dfs))
 }
 
 #' Gets graph node edge between two specific nodes

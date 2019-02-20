@@ -14,12 +14,13 @@ source("src/data2.R")
 source("src/external-monitor.R")
 source("src/utilities.R")
 source("src/campfire_lib.R")
+source("src/utils2.R")
 
 campfireApp(
   
   controller = div(
     h1("Controller"),
-    # textAreaInput("queries_string", "Search Queries", default_queries, height = '200px'),
+    textAreaInput("queries_string", "Search Queries", height = '200px'),
     selectInput(inputId = "edge_type",
                 label = "Edge Type:",
                 choices = list("hashtag", "tweet"),

@@ -35,7 +35,7 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
       withProgress(message = "Reloading...", value = 0, session = d, {
         incProgress(0, detail = "Getting Tweets", session = d)
         ServerValues$data <- fetchData("data/period_5.df.Rdata")
-        nodes <- getNodes(ServerValues$data, c(1,NA,2,3), c("group", NA, "group", "group"), c(1,NA,2,3))
+        nodes <- getNodes(ServerValues$data, parseTextQuery("'1, group, 1' '2, group, 2'"))
         edges <- getEdges(ServerValues$data, nodes, ServerValues$edge_type)
         ServerValues$network <- getNetwork(nodes, edges)
         

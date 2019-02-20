@@ -75,7 +75,6 @@ colorHashtags <- function(string, queries, hashtags, urls, mentions) {
   #
   # Returns:
   #   String with HTML formatted coloring.
-  string.copy <- string
   hashtags <- hashtags[order(nchar(hashtags), hashtags, decreasing = TRUE)]
   mentions <- mentions[order(nchar(mentions), mentions, decreasing = TRUE)]
   for(hashtag in hashtags) {
