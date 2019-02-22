@@ -1,5 +1,7 @@
-period5Names <- c("BIPARTISAN + ANONYMOUS", 
-                  "BLM 1", 
+period5Groups <- c('5_blm1' ,'5_bipart','5_blm2','5_blkent','5_consv','5_mnews1','5_mnews2','5_snews','5_thumor','5_ybt')
+
+period5Names <- c("BLM 1", 
+                  "BIPARTISAN + ANONYMOUS", 
                   "BLM 2", 
                   "BLACK ENTERTAINERS",
                   "CONSERVATIVES",
@@ -17,5 +19,4 @@ getGroupName <- function(period, group) {
     return(period5Names[group])
   }
   return(NULL)
-  
 }
