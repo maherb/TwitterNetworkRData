@@ -191,23 +191,6 @@ getToFrom <- function(data) {
     }
   }
   edges <- data.frame(to = to, from = from, value = value)
-  
-  #cleaned <- data %>%
-  #  group_by(id_str) %>%
-  #  filter(n() > 1)
-  #if(nrow(cleaned) == 0) {
-  #  edges <- NULL
-  #} else {
-  #  cleaned <- cleaned %>%
-  #    transmute(query = list(t(combn(query, 2)))) %>%
-  #    distinct() %>%
-  #    select(query)
-  #  edges <- as_tibble(do.call(rbind, cleaned$query)) %>%
-  #    group_by(V1, V2) %>%
-  #    mutate(value = n()) %>%
-  #    distinct() %>%
-  #    setNames(c("to", "from", "value"))
-  #}
   return(edges)
 }
 

@@ -1,20 +1,38 @@
-library(shiny)
-library(visNetwork)
-library(rtweet)
-library(tidyverse)
-library(ggplot2)
-library(useful)
+if (!require("shiny")) {
+  install.packages("shiny")
+  library(shiny)
+}
+if (!require("visNetwork")) {
+  install.packages("visNetwork")
+  library(visNetwork)
+}
+if (!require("rtweet")) {
+  install.packages("rtweet")
+  library(rtweet)
+}
+if (!require("tidyverse")) {
+  install.packages("tidyverse")
+  library(tidyverse)
+}
+if (!require("ggplot2")) {
+  install.packages("ggplot2")
+  library(ggplot2)
+}
+if (!require("useful")) {
+  install.packages("useful")
+  library(useful)
+}
 
-source("app-only-auth-twitter.R")
-source("data.R")
-source("floor.R")
-source("wall.R")
-source("external-monitor.R")
-source("utilities.R")
-source("campfire_lib.R")
+#source("app-only-auth-twitter.R")
+source("src/data.R")
+source("src/floor.R")
+source("src/wall.R")
+source("src/external-monitor.R")
+source("src/utilities.R")
+source("src/campfire_lib.R")
+source("src/groups.R")
 
 campfireApp(
-  
   controller = div(
     h1("Controller"),
     textAreaInput("queries_string", "Search Queries", default_queries, height = '200px'),
@@ -28,7 +46,7 @@ campfireApp(
     actionButton(inputId = "update",
                  label = "Update"),
     style = "position: absolute; 
-    top: 50%; left: 50%; 
+    top: 50%; left: 50%;
     margin-right: -50%; 
     transform: translate(-50%, -50%)"
   ),
@@ -42,38 +60,38 @@ campfireApp(
   floor = div(
     visNetworkOutput("network", width = "1000px", height = "900px"),
     style = paste0("position: absolute; 
-           top: 50%; left: 50%;
-           margin-right: -50%; 
-           transform: translate(-50%, -50%);
-           background: ", color.back,
-           "; height: 900px; overflow: hidden")
+                   top: 50%; left: 50%;
+                   margin-right: -50%; 
+                   transform: translate(-50%, -50%);
+                   background: ", color.back,
+                   "; height: 900px; overflow: hidden")
   ),
   
   datamonitor = div(fluidPage(
     fluidRow(
       column(12,
-            uiOutput("tweets_info")
+             uiOutput("tweets_info")
       )
     )),
     fluidRow(
       column(6,
              plotOutput("top.users.bar.extern", height = "920px")
-             ),
+      ),
       column(6,
              plotOutput("top.hashtags.bar.extern", height = "920px")
-             )
+      )
     ),
     style = paste0("background: ", color.back, ";
                    overflow: hidden;
                    height: 1080px")
-  ),
+    ),
   
   urlmonitor = div(fluidPage(
     htmlOutput("frame")
   )),
   
   serverFunct = function(serverValues, output, session) {
-
+    
     output$network <- renderVisNetwork({
       if(!is.null(serverValues$nodes)) {
         nodes_with_coords <- getCoords(serverValues$nodes)
@@ -83,58 +101,58 @@ campfireApp(
           # After drawing the network, center on 0,0 to keep position
           # independant of node number
           visEvents(type = "once", beforeDrawing = "function() {
-            this.moveTo({
-                          position: {
-                            x: 0,
-                            y: 0
-                          },
+                    this.moveTo({
+                    position: {
+                    x: 0,
+                    y: 0
+                    },
                     scale: 1
-            })
-            Shiny.onInputChange('current_node_id', -1);
-            Shiny.onInputChange('current_edge_index', -1);
-          }") %>%
+                    })
+                    Shiny.onInputChange('current_node_id', -1);
+                    Shiny.onInputChange('current_edge_index', -1);
+      }") %>%
           visPhysics(stabilization = FALSE, enabled = FALSE) %>%
           visInteraction(dragView = FALSE, zoomView = FALSE) %>%
           # Define behavior when clicking on nodes or edges
           visEvents(
-                    click = "function(properties) {
-                              if(this.getSelectedNodes().length == 1) {
-                                Shiny.onInputChange('current_node_id', this.getSelectedNodes()[0]);
-                                Shiny.onInputChange('current_edge_index', -1);
-                              } else if(this.getSelectedEdges().length == 1) {
-                                Shiny.onInputChange('current_edge_index', this.body.data.edges.get(properties.edges[0]).index);
-                                Shiny.onInputChange('current_node_id', -1);
-                              } else {
-                                Shiny.onInputChange('current_node_id', -1);
-                                Shiny.onInputChange('current_edge_index', -1);
-                              }
-                            }",
+            click = "function(properties) {
+            if(this.getSelectedNodes().length == 1) {
+            Shiny.onInputChange('current_node_id', this.getSelectedNodes()[0]);
+            Shiny.onInputChange('current_edge_index', -1);
+            } else if(this.getSelectedEdges().length == 1) {
+            Shiny.onInputChange('current_edge_index', this.body.data.edges.get(properties.edges[0]).index);
+            Shiny.onInputChange('current_node_id', -1);
+            } else {
+            Shiny.onInputChange('current_node_id', -1);
+            Shiny.onInputChange('current_edge_index', -1);
+            }
+  }",
                     doubleClick = "function() {
-                                     if(this.getSelectedNodes().length == 1) {
-                                       Shiny.onInputChange('delete_node', this.getSelectedNodes()[0]);
-                                       this.deleteSelected();
-                                       Shiny.onInputChange('current_node_id', -1);
-                                       Shiny.onInputChange('current_edge_index', -1);
-                                     }
-                                   }",
+            if(this.getSelectedNodes().length == 1) {
+            Shiny.onInputChange('delete_node', this.getSelectedNodes()[0]);
+            this.deleteSelected();
+            Shiny.onInputChange('current_node_id', -1);
+            Shiny.onInputChange('current_edge_index', -1);
+            }
+                    }",
                     dragStart = "function() {
-                                 var sel = this.getSelectedNodes();
-                                 if(sel.length == 1) {
-                                   Shiny.onInputChange('current_node_id', this.getSelectedNodes()[0]);
-                                   Shiny.onInputChange('current_edge_index', -1)
-                                   Shiny.onInputChange('start_position', this.getPositions(sel[0]))
-                                 }
-                               }",
+            var sel = this.getSelectedNodes();
+            if(sel.length == 1) {
+            Shiny.onInputChange('current_node_id', this.getSelectedNodes()[0]);
+            Shiny.onInputChange('current_edge_index', -1)
+            Shiny.onInputChange('start_position', this.getPositions(sel[0]))
+            }
+                    }",
                     dragEnd = "function() {
-                                 var sel = this.getSelectedNodes();
-                                 if(sel.length == 1) {
-                                   Shiny.onInputChange('end_position', this.getPositions(sel[0]))
-                                 }
-                               }"
+            var sel = this.getSelectedNodes();
+            if(sel.length == 1) {
+            Shiny.onInputChange('end_position', this.getPositions(sel[0]))
+            }
+                    }"
                   )
-                  
-      }
-    })
+        
+        }
+      })
     
     output$tweets_info <- renderUI({
       if(serverValues$current_node_id == -1 && serverValues$current_edge_index == -1) {
@@ -165,17 +183,17 @@ campfireApp(
       fluidPage(
         tags$script(HTML(
           "$(document).on('click', '.clickable', function () {
-              var text =  $(this).text();
-              Shiny.onInputChange('clicked_text', text);
-            });"
+          var text =  $(this).text();
+          Shiny.onInputChange('clicked_text', text);
+    });"
         )),
         fluidRow(
           lapply(1:12, function(col.num) {
             serverValues$col_list[[col.num]] 
           })
         )
-      )
-    })
+        )
+      })
     
     output$top.users.bar.extern <- renderPlot({
       serverValues$monitor.domain <- getDefaultReactiveDomain()
@@ -185,22 +203,22 @@ campfireApp(
           arrange(desc(n)) %>%
           slice(1:10) %>%
           ggplot(aes(reorder(screen_name, n), n)) + 
-            geom_col(fill = color.blue, color = color.blue) + 
-            coord_flip() + 
-            labs(x = "Screen Name", y = "Tweets", title = "Top 10 Users") + 
-            theme_dark() +
-            theme(plot.background = element_rect(fill = color.back, color = NA),
-                  axis.text = element_text(size = 20, colour = color.white),
-                  text = element_text(size = 20, colour = color.blue))
+          geom_col(fill = color.blue, color = color.blue) + 
+          coord_flip() + 
+          labs(x = "Screen Name", y = "Tweets", title = "Top 10 Users") + 
+          theme_dark() +
+          theme(plot.background = element_rect(fill = color.back, color = NA),
+                axis.text = element_text(size = 20, colour = color.white),
+                text = element_text(size = 20, colour = color.blue))
       } else {
         serverValues$data %>%
           count(query) %>%
           ggplot(aes(reorder(query, n), n)) +
-            geom_col(fill = color.blue, color = color.blue) +
-            coord_flip() +
-            labs(x = "Query", y = "Number of Tweets", title = "Tweet Composition") +
-            theme_dark() +
-            theme(panel.border = element_blank(),
+          geom_col(fill = color.blue, color = color.blue) +
+          coord_flip() +
+          labs(x = "Query", y = "Number of Tweets", title = "Tweet Composition") +
+          theme_dark() +
+          theme(panel.border = element_blank(),
                 plot.background = element_rect(fill = "#151E29", color = NA),
                 axis.text = element_text(size = 20, colour = "#f0f0f0"),
                 text = element_text(size = 20, colour = "#1D8DEE"))
@@ -218,25 +236,25 @@ campfireApp(
           arrange(desc(n)) %>%
           slice(1:10) %>%
           ggplot(aes(reorder(hashtags, n), n)) +
-            geom_col(fill = color.blue, color = color.blue) +
-            coord_flip() +
-            labs(x = "Hashtag", y = "Frequency", title = "Top 10 Hashtags") +
-            theme_dark() +
-            theme(panel.border = element_blank(),
-                  plot.background = element_rect(fill = color.back, color = NA),
-                  axis.text = element_text(size = 20, colour = color.white),
-                  text = element_text(size = 20, colour = color.blue))
+          geom_col(fill = color.blue, color = color.blue) +
+          coord_flip() +
+          labs(x = "Hashtag", y = "Frequency", title = "Top 10 Hashtags") +
+          theme_dark() +
+          theme(panel.border = element_blank(),
+                plot.background = element_rect(fill = color.back, color = NA),
+                axis.text = element_text(size = 20, colour = color.white),
+                text = element_text(size = 20, colour = color.blue))
       } else {
         serverValues$data %>% 
           distinct(screen_name, source) %>%
           count(source) %>% 
           filter(n >= 5) %>%
           ggplot(aes(reorder(source, n), n)) + 
-            geom_col(fill = color.blue, color = color.blue) +
-            coord_flip() + 
-            labs(x = "Source", y = "Tweets", title = "Tweets by source", subtitle = "sources with >=5 tweets") +
-            theme_dark() +
-            theme(panel.border = element_blank(),
+          geom_col(fill = color.blue, color = color.blue) +
+          coord_flip() + 
+          labs(x = "Source", y = "Tweets", title = "Tweets by source", subtitle = "sources with >=5 tweets") +
+          theme_dark() +
+          theme(panel.border = element_blank(),
                 plot.background = element_rect(fill = color.back, color = NA),
                 axis.text = element_text(size = 20, colour = color.white),
                 text = element_text(size = 20, colour = color.blue))
@@ -267,5 +285,5 @@ campfireApp(
         visSelectNodes(serverValues$current_node_id)
     })
     
-  }
-)
+    }
+  )
