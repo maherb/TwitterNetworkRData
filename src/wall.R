@@ -67,7 +67,7 @@ highlightMentions <- function(string, mentions) {
   if (!is.null(mentions)) {
     mentions <- mentions[order(nchar(mentions), mentions, decreasing = TRUE)]
     for(mention in mentions) {
-      replacement <- paste0('<span class="clickable mentionincluded">', paste0("@&", mention), '</span>')
+      replacement <- paste0('<span class="clickable mentionincluded">', "@&", mention, '</span>')
       string <- str_replace_all(string, paste0("@", mention), replacement)
     }
     string <- str_replace_all(string, "@&", "@")
@@ -79,7 +79,7 @@ highlightHashtags <- function(string, hashtags) {
   if (!is.null(hashtags)) {
     hashtags <- hashtags[order(nchar(hashtags), hashtags, decreasing = TRUE)]
     for(hashtag in hashtags) {
-      replacement <- paste0('<span class="clickable included">', paste0("#&", hashtag), '</span>')
+      replacement <- paste0('<span class="clickable included">', "#&", hashtag, '</span>')
       string <- str_replace_all(string, paste0("#", hashtag), replacement)
     }
     string <- str_replace_all(string, "#&", "#")
