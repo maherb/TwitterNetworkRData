@@ -47,10 +47,10 @@ UpdateColumn <- function(data_subset, current_node_data, queries) {
                               tweetText <- data_subset$full_text[tweet_num]
                               tweetHashtags <- unlist(data_subset$hashtags[tweet_num])
                               tweetUrls <- unlist(data_subset$urls[tweet_num])
-                              #tweetMentions <- ????
+                              tweetMentions <- unlist(data_subset$user_mentions[tweet_num])
                               coloredText <- highlightHashtags(tweetText, tweetHashtags)
                               coloredText <- highlightUrls(coloredText, tweetUrls)
-                              #coloredText <- highlightMentions(coloredText, tweetMentions)
+                              coloredText <- highlightMentions(coloredText, tweetMentions)
                               tags$div(style = 'padding: 0px;',
                                         tags$h3(tags$span(class = "clickable", paste0("@", data_subset$user_screen_name[tweet_num]))),
                                        tags$p(HTML(coloredText)),
@@ -64,13 +64,14 @@ UpdateColumn <- function(data_subset, current_node_data, queries) {
 }
 
 highlightMentions <- function(string, mentions) {
-  mentions <- mentions[order(nchar(mentions), mentions, decreasing = TRUE)]
-  for(mention in mentions) {
-    link <- a(mention, href = paste0("https://twitter.com/", mention))
-    replacement <- paste0('<span class="clickable mentionincluded">', paste0("@&", link), '</span>')
-    string <- str_replace_all(string, paste0("@", mention), replacement)
+  if (!is.null(mentions)) {
+    mentions <- mentions[order(nchar(mentions), mentions, decreasing = TRUE)]
+    for(mention in mentions) {
+      replacement <- paste0('<span class="clickable mentionincluded">', paste0("@&", mention), '</span>')
+      string <- str_replace_all(string, paste0("@", mention), replacement)
+    }
+    string <- str_replace_all(string, "@&", "@")
   }
-  string <- str_replace_all(string, "@&", "@")
   return(string)
 }
 
@@ -78,8 +79,7 @@ highlightHashtags <- function(string, hashtags) {
   if (!is.null(hashtags)) {
     hashtags <- hashtags[order(nchar(hashtags), hashtags, decreasing = TRUE)]
     for(hashtag in hashtags) {
-      link <- a(hashtag, href = paste0("https://twitter.com/hashtag/", hashtag), style="color:inherit")
-      replacement <- paste0('<span class="clickable included">', paste0("#&", link), '</span>')
+      replacement <- paste0('<span class="clickable included">', paste0("#&", hashtag), '</span>')
       string <- str_replace_all(string, paste0("#", hashtag), replacement)
     }
     string <- str_replace_all(string, "#&", "#")
@@ -91,9 +91,8 @@ highlightUrls <- function(string, urls) {
   if (!is.null(urls)) {
     for(url in urls) {
       if(!is.na(url)) {
-        link <- a(url, href = url)
-        replacement <- paste0('<span class="clickable url">', link, '</span>')
-        string <- str_replace_all(string, url, replacement)
+       replacement <- paste0('<span class="clickable url">', url, '</span>')
+       string <- str_replace_all(string, url, replacement)
       }
     }
   }
