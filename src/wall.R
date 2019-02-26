@@ -63,12 +63,18 @@ UpdateColumn <- function(data_subset, current_node_data, queries) {
   )
 }
 
+# case insensitive, though it can only highlight one varation of each handle, i.e.
+# if there is "@BrIaN" and "@bRIAN", it will only light whichever one happens first. 
 highlightMentions <- function(string, mentions) {
   if (!is.null(mentions)) {
     mentions <- mentions[order(nchar(mentions), mentions, decreasing = TRUE)]
     for(mention in mentions) {
       replacement <- paste0('<span class="clickable mentionincluded">', "@&", mention, '</span>')
-      string <- str_replace_all(string, paste0("@", mention), replacement)
+      mentionPosInfo <- regexpr(paste0("@", tolower(mention)), tolower(string), fixed = TRUE)
+      mentionPos <- mentionPosInfo[1]
+      mentionText <- substr(string, mentionPos, mentionPos + nchar(mention))
+      print(mentionText)
+      string <- str_replace_all(string, mentionText, replacement)
     }
     string <- str_replace_all(string, "@&", "@")
   }
