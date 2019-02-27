@@ -79,7 +79,7 @@ highlightHashtags <- function(string, hashtags) {
   if (!is.null(hashtags)) {
     hashtags <- hashtags[order(nchar(hashtags), hashtags, decreasing = TRUE)]
     for(hashtag in hashtags) {
-      replacement <- paste0('<span class="clickable included">', "#&", hashtag, '</span>')
+      replacement <- paste0('<span class="clickable notincluded">', "#&", hashtag, '</span>')
       string <- str_replace_all(string, paste0("#", hashtag), replacement)
     }
     string <- str_replace_all(string, "#&", "#")
@@ -89,15 +89,9 @@ highlightHashtags <- function(string, hashtags) {
 
 highlightUrls <- function(string, urls) {
   if (!is.null(urls)) {
-    if (length(urls) > 1) {
-      print(urls)
-    }
     for(url in urls) {
        replacement <- paste0('<span class="clickable url">', url, '</span>')
        string <- str_replace_all(string, url, replacement)
-    }
-    if (length(urls) > 1) {
-      print(string)
     }
   }
   return(string)
