@@ -89,11 +89,15 @@ highlightHashtags <- function(string, hashtags) {
 
 highlightUrls <- function(string, urls) {
   if (!is.null(urls)) {
+    if (length(urls) > 1) {
+      print(urls)
+    }
     for(url in urls) {
-      if(!is.na(url)) {
        replacement <- paste0('<span class="clickable url">', url, '</span>')
        string <- str_replace_all(string, url, replacement)
-      }
+    }
+    if (length(urls) > 1) {
+      print(string)
     }
   }
   return(string)
