@@ -40,18 +40,65 @@ getSubset <- function(data, subset_query)
   data_subset
 }
 
+#' Gets subset of data.
+#'
+#' @param data Dataframe with tweet data.
+#' @param subset_queries Query objects to subset from. MUST all have the same colname. 
+#' @param colname Column name to subset from.
+#' @return Subset of main data based on queries and type.
+getSubsetColname <- function(data, subset_queries, colname)
+{
+  queries <- sapply(subset_queries, function(x){
+    x$q
+    })
+  if(colname %in% colnames(data))
+  {
+    contains <- vector(length = nrow(data))
+    for(i in 1:length(contains))
+    {
+      if(any(queries %in% unlist(data[i, colname])))
+      {
+        contains[i] = TRUE
+      }
+    }
+    data_subset <- filter(data, contains)
+  }
+  else
+  {
+    data_subset <- NULL
+  }
+  data_subset
+}
+
 #' Gets intersection subset of data.
 #'
 #' @param data Dataframe with tweet data.
 #' @param subset_queries List of query objects to subset from. 
 #' @return Subset of main data based on query and type.
-getSubset2 <- function(data, subset_queries)
+getSubset2AND <- function(data, subset_queries)
 {
   subset <- data
   for(i in 1:length(subset_queries))
   {
     subset <- getSubset(subset, subset_queries[[i]])
   }
+  subset
+}
+
+#' Gets union subset of data.
+#'
+#' @param data Dataframe with tweet data.
+#' @param subset_queries List of query objects to subset from. 
+#' @return Subset of main data based on query and type.
+getSubset2OR <- function(data, subset_queries)
+{
+  subsets <- vector(mode = "list", length = length(subset_queries))
+  for(i in 1:length(subsets))
+  {
+    subsets[[i]] <- getSubset(data, subset_queries[[i]])
+  }
+  subset <- do.call("rbind", subsets) %>%
+    distinct()
   subset
 }
 
@@ -93,7 +140,7 @@ updatePositions <- function(nodes) {
   scale <- 75
   angles <- rev(seq(0, (3/2)*pi, (2 * pi)/12))
   angles <- c(angles, seq((3/2)*pi, 2*pi, (2 * pi)/12)[3:2])
-  for(i in 1:min(length(nodes), 12)) 
+  for(i in 1:min(nrow(nodes), 12)) 
   {
     nodes$x[i] <- scale * radius * cos(angles[[i]])
     nodes$y[i] <- -scale * radius * sin(angles[[i]])
@@ -127,16 +174,22 @@ getNodes <- function(data, node_queries)
 #' @return Subset of data containing rows from to_query, from_query that share common colname content.
 getEdgeSubset <- function(data, to_query, from_query, colname)
 {
-  subset <- getSubset2(data, list(to_query, from_query))
   to_node_subset <- getSubset(data, to_query)
+  from_node_subset <- getSubset(data, from_query)
+  subset <- rbind(to_node_subset, from_node_subset)
   to_content <- unique(unlist(to_node_subset[ , colname]))
-  edge_queries <- vector(mode = "list", length = length(to_content))
-  for(i in 1:length(subset_queries))
+  from_content <- unique(unlist(from_node_subset[ , colname]))
+  shared_content <- intersect(to_content, from_content)
+  tmps <- vector(mode = "list", length = length(shared_content))
+  if(length(shared_content > 0))
   {
-    edge_queries[[i]] <- structure(list(q = subset_queries[[i]], colname = colname),
-                                   class = "Query")
+    for(i in 1:length(tmps))
+    {
+      tmps[[i]] <- structure(list(q = shared_content[i], colname = colname),
+                       class = "Query")
+    }
   }
-  edge_subset <- getSubset2(data, edge_queries)
+  edge_subset <- getSubsetColname(subset, tmps, colname)
   edge_subset
 }
 
@@ -166,12 +219,12 @@ getEdge <- function(data, to_query, from_query, colname)
 getEdges <- function(data, subset_queries, edge_colname)
 {
   edges <- data.frame()
-  node_combinations <- combn(1:length(subset_queries))
-  for(i in 1:length(subset_queries))
+  node_combinations <- combn(1:length(subset_queries), 2)
+  for(i in 1:ncol(node_combinations))
   {
     edges <- rbind(edges, getEdge(data,
                                   subset_queries[[node_combinations[ ,i][1]]],
-                                  subset_queries[[node_combinations[ ,i][1]]],
+                                  subset_queries[[node_combinations[ ,i][2]]],
                                   edge_colname))
   }
   edges
