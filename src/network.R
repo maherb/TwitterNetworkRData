@@ -202,8 +202,12 @@ getEdgeSubset <- function(data, to_query, from_query, colname)
 #' @return Edge data frame to to_query from from_query.
 getEdge <- function(data, to_query, from_query, colname)
 {
+  size <- 0
   edge_subset <- getEdgeSubset(data, to_query, from_query, colname)
-  size <- nrow(edge_subset)
+  if(!is.null(nrow(edge_subset)))
+  {
+    size <- nrow(edge_subset)
+  }
   edge <- data.frame(to = to_query$q,
                      from = from_query$q,
                      value = size)
@@ -216,32 +220,33 @@ getEdge <- function(data, to_query, from_query, colname)
 #' @param subset_queries List of query objects to subset from.  
 #' @param edge_colname Column name to search in to create edges.
 #' @returns Dataframe of edge data.
-getEdges <- function(data, subset_queries, edge_colname)
+getEdges <- function(data, node_queries, edge_colname)
 {
+  subset_queries <- lapply(node_queries, function(x) {
+    x$query
+  })
   edges <- data.frame()
   node_combinations <- combn(1:length(subset_queries), 2)
   for(i in 1:ncol(node_combinations))
   {
-    edges <- rbind(edges, getEdge(data,
-                                  subset_queries[[node_combinations[ ,i][1]]],
-                                  subset_queries[[node_combinations[ ,i][2]]],
-                                  edge_colname))
+    if(!is.na(subset_queries[[node_combinations[ ,i][1]]]) && !is.na(subset_queries[[node_combinations[ ,i][2]]]))
+    {
+      edges <- rbind(edges, getEdge(data,
+                                    subset_queries[[node_combinations[ ,i][1]]],
+                                    subset_queries[[node_combinations[ ,i][2]]],
+                                    edge_colname))
+    }
   }
   edges
 }
 
 #' Get visNetwork object for the floor.
 #' 
-#' @param data Dataframe of tweet data.
-#' @param node_queries List of NodeQuery objects.
-#' @param edge_colname Column name to search in to create edges.
-getNetwork <- function(data, node_queries, edge_colname)
+#' @param nodes Node dataframe.
+#' @param edges Edge dataframe.
+getNetwork <- function(nodes, edges)
 {
-  nodes <- getNodes(data, node_queries)
-  subset_queries <- lapply(node_queries, function(x) {
-      x$query
-    })
-  edges <- getEdges(data, subset_queries, edge_colname)
+  nodes <- nodes[!is.na(nodes$id), ]
   visNetwork(nodes, edges) %>%
     visEdges(scaling = list("min" = 0), smooth = list("enabled" = TRUE)) %>%
     visNodes(scaling = list("min" = 10, "max" = 50)) %>%

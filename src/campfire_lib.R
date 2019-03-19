@@ -1,7 +1,8 @@
 # MW Shiny ----------------------------------------------------------------
 
 campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
-                       urlmonitor = NA, serverFunct = NA) {
+                       urlmonitor = NA, serverFunct = NA) 
+  {
   
   ui <- campfireUI(controller, wall, floor, datamonitor, urlmonitor)
   
@@ -12,12 +13,15 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
                                  # current_node_id = -1,
                                  # current_node_index = -1)
   
-  campfire_server <- shinyServer(function(input, output, session) {
+  campfire_server <- shinyServer(function(input, output, session) 
+    {
     
     #' Updates the central serverValues with the input values from a SPECIFIC window.
     #' Whatever domain calls this will update its input values with serverValues.
-    updateValues <- reactive({
-      for(inputId in names(input)) {
+    updateValues <- reactive(
+    {
+      for(inputId in names(input))
+      {
         ServerValues[[inputId]] <- input[[inputId]]
       }
     })
@@ -26,18 +30,35 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
     #' Load bar will default to the specific window domain this is called in. 
     #' We keep track of the monitor domain so the load bar will have priority there if it is open.
     #' TODO: Better implementation of loadbar
-    updateComplete <- reactive({
-      if(is.null(ServerValues$monitor.domain)) {
+    updateComplete <- reactive(
+      {
+      if(is.null(ServerValues$monitor.domain)) 
+      {
         d <- getDefaultReactiveDomain()
-      } else {
+      } 
+      else
+      {
         d <- ServerValues$monitor.domain
       }
       withProgress(message = "Reloading...", value = 0, session = d, {
         incProgress(0, detail = "Getting Tweets", session = d)
-        ServerValues$data <- fetchData("data/period_5.df.Rdata")
-        nodes <- getNodes(ServerValues$data, parseTextQuery("'1, group, 1' '2, group, 2'"))
-        edges <- getEdges(ServerValues$data, nodes, ServerValues$edge_type)
-        ServerValues$network <- getNetwork(nodes, edges)
+        if(!is.null(ServerValues$json_file))
+        {
+          parsed_json <- fromJSON(ServerValues$json_file$datapath, nullValue = NA, simplify = FALSE)
+          ServerValues$data <- fetchData(parsed_json$data_file)
+          ServerValues$nodes <- getNodes(ServerValues$data, parsed_json$nodes)
+          ServerValues$edges <- getEdges(ServerValues$data, parsed_json$nodes, parsed_json$edge_colname)
+          View(ServerValues$nodes)
+          View(ServerValues$edges)
+          ServerValues$network <- getNetwork(ServerValues$nodes, ServerValues$edges)
+        }
+        
+        
+        
+        # ServerValues$data <- fetchData("data/period_5.df.Rdata")
+        # nodes <- getNodes(ServerValues$data, parseTextQuery("'1, group, 1' '2, group, 2'"))
+        # edges <- getEdges(ServerValues$data, nodes, ServerValues$edge_type)
+        # ServerValues$network <- getNetwork(nodes, edges)
         
         # ServerValues$data <- getData(serverValues$queries,
         #                              serverValues$number_tweets,
