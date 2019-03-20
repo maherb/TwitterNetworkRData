@@ -7,7 +7,6 @@ library(assertthat)
 library(RJSONIO)
 
 source("app-only-auth-twitter.R")
-source("src/data.R")
 source("src/floor.R")
 source("src/wall.R")
 source("src/network.R")
