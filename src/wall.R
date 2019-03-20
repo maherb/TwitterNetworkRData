@@ -9,9 +9,11 @@ updateWall <- function(data, nodes) {
   #
   # Returns:
   #   List of Shiny HTML columns containing tweet data.
+  print("Time to update the wall!")
+  print(nodes)
   col_list <- vector("list", 12)
   col_list <- lapply(1:12, function(col_num) {
-    if(!(col_num %in% nodes$position_)) {
+    if(!(col_num %in% nodes$id)) {
       column(width = 1,
              textInput(paste0("text.column.", col_num), label = ""),
              actionButton(paste0("button.column.", col_num), "Submit"))
