@@ -9,23 +9,22 @@ updateWall <- function(data, nodes) {
   #
   # Returns:
   #   List of Shiny HTML columns containing tweet data.
-  print("Time to update the wall!")
-  print(nodes)
   col_list <- vector("list", 12)
   col_list <- lapply(1:12, function(col_num) {
-  if(is.na(nodes$id[col_num]))
-  {
-    column(width = 1,
-      textInput(paste0("text.column.", col_num), label = ""),
-      actionButton(paste0("button.column.", col_num), "Submit"))
-  }
-  else
-  {
-    current_node_data <- nodes[col_num, ]
-    data_subset <- getDataSubset(data, list(q = current_node_data$id, colname = current_node_data$colname))
-    UpdateColumn(data_subset, current_node_data, nodes$id)
-  }
+    if(is.na(nodes$id[col_num]))
+    {
+      column(width = 1,
+        textInput(paste0("text.column.", col_num), label = ""),
+        actionButton(paste0("button.column.", col_num), "Submit"))
+    }
+    else
+    {
+      current_node_data <- nodes[col_num, ]
+      data_subset <- getSubset(data, list(q = current_node_data$id, colname = current_node_data$colname))
+      UpdateColumn(data_subset, current_node_data, nodes$id)
+    }
   })
+  col_list
 }
 
 
@@ -41,11 +40,11 @@ UpdateColumn <- function(data_subset, current_node_data, queries) {
   #
   # Returns:
   #   List of Shiny html columns containing tweet data.
-  header_text <- getGroupName(5, as.integer(current_node_data$label))
+  # header_text <- getGroupName(5, as.integer(current_node_data$label))
   column(width = 1,
          tags$div(includeCSS("wall.css"),
                   fluidRow(
-                    tags$h2(tags$span(class = "clickable", header_text))
+                    #tags$h2(tags$span(class = "clickable", header_text))
                   ),
                   fluidRow(style = 'height: 600px;
                   overflow-y: auto;

@@ -43,7 +43,6 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
         if(!is.null(ServerValues$json_file))
         {
           parsed_json <- fromJSON(ServerValues$json_file$datapath, nullValue = NA, simplify = FALSE)
-          View(parsed_json)
           ServerValues$data <- fetchData(parsed_json$data_file)
           ServerValues$edge_colname <- parsed_json$edge_colname
           ServerValues$nodes <- getNodes(ServerValues$data, parsed_json$nodes)
