@@ -4,6 +4,7 @@ library(tidyverse)
 library(ggplot2)
 library(useful)
 library(assertthat)
+library(RJSONIO)
 
 source("app-only-auth-twitter.R")
 source("src/data.R")
@@ -176,21 +177,21 @@ campfireApp(
       }
     })
     
-    # output$wall_ui <- renderUI({
-    #   fluidPage(
-    #     tags$script(HTML(
-    #       "$(document).on('click', '.clickable', function () {
-    #           var text =  $(this).text();
-    #           Shiny.onInputChange('clicked_text', text);
-    #         });"
-    #     )),
-    #     fluidRow(
-    #       lapply(1:12, function(col.num) {
-    #         serverValues$col_list[[col.num]] 
-    #       })
-    #     )
-    #   )
-    # })
+    output$wall_ui <- renderUI({
+       fluidPage(
+         tags$script(HTML(
+          "$(document).on('click', '.clickable', function () {
+              var text =  $(this).text();
+              Shiny.onInputChange('clicked_text', text);
+            });"
+        )),
+        fluidRow(
+          lapply(1:12, function(col.num) {
+            ServerValues$col_list[[col.num]]
+          })
+        )
+      )
+    })
     # 
     # output$top.users.bar.extern <- renderPlot({
     #   serverValues$monitor.domain <- getDefaultReactiveDomain()

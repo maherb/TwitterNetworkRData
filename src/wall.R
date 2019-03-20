@@ -9,9 +9,11 @@ updateWall <- function(data, nodes) {
   #
   # Returns:
   #   List of Shiny HTML columns containing tweet data.
+  print("Time to update the wall!")
+  print(nodes)
   col_list <- vector("list", 12)
   col_list <- lapply(1:12, function(col_num) {
-    if(!(col_num %in% nodes$position_)) {
+    if(!(col_num %in% nodes$id)) {
       column(width = 1,
              textInput(paste0("text.column.", col_num), label = ""),
              actionButton(paste0("button.column.", col_num), "Submit"))
@@ -36,25 +38,28 @@ UpdateColumn <- function(data_subset, current_node_data, queries) {
   #
   # Returns:
   #   List of Shiny html columns containing tweet data.
+  header_text <- getGroupName(5, as.integer(current_node_data$label))
   column(width = 1,
          tags$div(includeCSS("wall.css"),
                   fluidRow(
-                    tags$h2(tags$span(class = "clickable", current_node_data$label))
+                    tags$h2(tags$span(class = "clickable", header_text))
                   ),
                   fluidRow(style = 'height: 600px;
                   overflow-y: auto;
                   overflow-x: hidden;',
                            if(nrow(data_subset) > 0) {
                              lapply(1:nrow(data_subset), function(tweet_num) {
-                               colored.text <- colorHashtags(data_subset$text[[tweet_num]],
-                                                             queries,
-                                                             data_subset$hashtags[[tweet_num]],
-                                                             c(data_subset$urls_t.co[[tweet_num]], data_subset$ext_media_t.co[[tweet_num]]),
-                                                             data_subset$mentions_screen_name[[tweet_num]])
-                               tags$div(style = 'padding: 0px;',
-                                        tags$h3(tags$span(class = "clickable", paste0("@", data_subset$screen_name[[tweet_num]]))),
-                                        tags$p(HTML(colored.text)),
-                                        tags$p(HTML(paste("&#x1F499", data_subset$favorite_count[[tweet_num]], "&#x1F504", data_subset$retweet_count[[tweet_num]])))
+                              tweetText <- data_subset$full_text[tweet_num]
+                              tweetHashtags <- unlist(data_subset$hashtags[tweet_num])
+                              tweetUrls <- unlist(data_subset$urls[tweet_num])
+                              tweetMentions <- unlist(data_subset$user_mentions[tweet_num])
+                              coloredText <- highlightHashtags(tweetText, tweetHashtags)
+                              coloredText <- highlightUrls(coloredText, tweetUrls)
+                              coloredText <- highlightMentions(coloredText, tweetMentions)
+                              tags$div(style = 'padding: 0px;',
+                                        tags$h3(tags$span(class = "clickable", paste0("@", data_subset$user_screen_name[tweet_num]))),
+                                       tags$p(HTML(coloredText)),
+                                       tags$p(HTML(paste("&#x1F499", data_subset$favorite_count[tweet_num], "&#x1F504", data_subset$retweet_count[tweet_num])))
                                )
                              })
                            }
@@ -63,42 +68,35 @@ UpdateColumn <- function(data_subset, current_node_data, queries) {
   )
 }
 
-colorHashtags <- function(string, queries, hashtags, urls, mentions) {
-  # Colors a string based on specific hashtags, urls, and mentions.
-  # 
-  # Args:
-  #   string: String of text to be colored.
-  #   queries: Vector of strings to be used to search for tweets. Queries are allowed to be NA.
-  #   hashtags: Vector of hashtags to be colored in string. Do not need to begin with "#".
-  #   urls: Vector of urls to be colored in string.
-  #   mentions: Vector of hashtags to be colored in string. Do not need to begin with "@".
-  #
-  # Returns:
-  #   String with HTML formatted coloring.
-  hashtags <- hashtags[order(nchar(hashtags), hashtags, decreasing = TRUE)]
-  mentions <- mentions[order(nchar(mentions), mentions, decreasing = TRUE)]
-  for(hashtag in hashtags) {
-    if(toupper(paste0("#", hashtag)) %in% toupper(queries)) {
-      replacement <- paste0('<span class="clickable included">', paste0("#&", hashtag), '</span>')
-    } else {
-      replacement <- paste0('<span class="clickable notincluded">', paste0("#&", hashtag), '</span>')
+highlightMentions <- function(string, mentions) {
+  if (!is.null(mentions)) {
+    mentions <- mentions[order(nchar(mentions), mentions, decreasing = TRUE)]
+    for(mention in mentions) {
+      replacement <- paste0('<span class="clickable mentionincluded">', "@&", mention, '</span>')
+      string <- gsub(paste0('@', mention), replacement, string, ignore.case = TRUE)
     }
-    string <- str_replace_all(string, paste0("#", hashtag), replacement)
+    string <- str_replace_all(string, "@&", "@")
   }
-  string <- str_replace_all(string, "#&", "#")
-  for(mention in mentions) {
-    if(toupper(paste0("@", mention)) %in% toupper(queries)) {
-      replacement <- paste0('<span class="clickable mentionincluded">', paste0("@&", mention), '</span>')
-    } else {
-      replacement <- paste0('<span class="clickable notincluded">', paste0("@&", mention), '</span>')
+  return(string)
+}
+
+highlightHashtags <- function(string, hashtags) {
+  if (!is.null(hashtags)) {
+    hashtags <- hashtags[order(nchar(hashtags), hashtags, decreasing = TRUE)]
+    for(hashtag in hashtags) {
+      replacement <- paste0('<span class="clickable notincluded">', "#&", hashtag, '</span>')
+      string <- str_replace_all(string, paste0("#", hashtag), replacement)
     }
-    string <- str_replace_all(string, paste0("@", mention), replacement)
+    string <- str_replace_all(string, "#&", "#")
   }
-  string <- str_replace_all(string, "@&", "@")
-  for(url in urls) {
-    if(!is.na(url)) {
-      replacement <- paste0('<span class="clickable url">', url, '</span>')
-      string <- str_replace_all(string, url, replacement)
+  return(string)
+}
+
+highlightUrls <- function(string, urls) {
+  if (!is.null(urls)) {
+    for(url in urls) {
+       replacement <- paste0('<span class="clickable url">', url, '</span>')
+       string <- str_replace_all(string, url, replacement)
     }
   }
   return(string)

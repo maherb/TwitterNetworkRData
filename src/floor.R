@@ -75,7 +75,8 @@ getNodesValue <- function(data, nodes) {
   value <- c(length = nodes_rows)
   # Determine how many tweets include each hashtag
   for(i in 1:nodes_rows) {
-    value[i] <- sum(data$query == nodes$id[i])
+    dataInNode <- nodes$id[[i]] == data$query
+    value[i] <- length(dataInNode[dataInNode == TRUE])
   }
   return(value)
 }
@@ -153,6 +154,16 @@ getEdges <- function(data, queries) {
   return(edges)
 }
 
+
+getDistinctStrings <- function(strings) {
+  as.character(levels(as.factor(strings)))
+}
+
+getDistinctHashtags <- function(data_subset) {
+  getDistinctStrings(unlist(data_subset$hashtags))
+}
+
+
 getToFrom <- function(data) {
   # Get edge data for visNetwork input.
   # 
@@ -162,22 +173,24 @@ getToFrom <- function(data) {
   # Returns:
   #   Data frame in the format:
   #     to  from  index  color 
-  cleaned <- data %>%
-    group_by(status_id) %>%
-    filter(n() > 1)
-  if(nrow(cleaned) == 0) {
-    edges <- NULL
-  } else {
-    cleaned <- cleaned %>%
-      transmute(query = list(t(combn(query, 2)))) %>%
-      distinct() %>%
-      select(query)
-    edges <- as_tibble(do.call(rbind, cleaned$query)) %>%
-      group_by(V1, V2) %>%
-      mutate(value = n()) %>%
-      distinct() %>%
-      setNames(c("to", "from", "value"))
+  
+  
+  to <- c()
+  from <- c()
+  value <- c()
+  queries <- getDistinctStrings(data$query)
+  for (query1 in queries) {
+    for (query2 in queries) {
+      if (query1 != query2) {
+        to <- c(to, query1)
+        from <- c(from, query2)
+        query1Hashtags <- getDistinctHashtags(data[data$query == query1, ])
+        query2Hashtags <- getDistinctHashtags(data[data$query == query2, ])
+        value <- c(value, sum(query1Hashtags %in% query2Hashtags))
+      }
+    }
   }
+  edges <- data.frame(to = to, from = from, value = value)
   return(edges)
 }
 
