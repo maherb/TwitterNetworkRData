@@ -7,11 +7,9 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
   ui <- campfireUI(controller, wall, floor, datamonitor, urlmonitor)
   
   # MW Shiny central reactive values. initialized makes sure default search is done on startup.
-  ServerValues<- reactiveValues(initialized = FALSE)
+  ServerValues<- reactiveValues(initialized = FALSE, network_selected = "", network_selected_e = "")
                                  # data_subset = NULL,
-                                 # type = "none",
-                                 # current_node_id = -1,
-                                 # current_node_index = -1)
+                                 # type = "none")
   
   campfire_server <- shinyServer(function(input, output, session) 
     {
@@ -46,10 +44,9 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
         {
           parsed_json <- fromJSON(ServerValues$json_file$datapath, nullValue = NA, simplify = FALSE)
           ServerValues$data <- fetchData(parsed_json$data_file)
+          ServerValues$edge_colname <- parsed_json$edge_colname
           ServerValues$nodes <- getNodes(ServerValues$data, parsed_json$nodes)
-          ServerValues$edges <- getEdges(ServerValues$data, parsed_json$nodes, parsed_json$edge_colname)
-          View(ServerValues$nodes)
-          View(ServerValues$edges)
+          ServerValues$edges <- getEdges(ServerValues$data, parsed_json$nodes, ServerValues$edge_colname)
           ServerValues$network <- getNetwork(ServerValues$nodes, ServerValues$edges)
         }
         
@@ -99,58 +96,46 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
       updateFromController()
     })
     
-    # observeEvent(input$file, {
-    #   # Change queries to the input of a text file.
-    #   #
-    #   # Event:
-    #   #   Text file is chosen on controller. 
-    #   updateValues()
-    #   ServerValues$queries <- read.table(serverValues$file$datapath, header = FALSE,
-    #                      comment.char = "", stringsAsFactors = FALSE)$V1
-    # })
+    # Observe when a node is clicked.
+    observeEvent(input$network_selected, {
+      updateValues()
+      if(ServerValues$network_selected != "")
+      {
+        # Update data_subset
+        node_info <- ServerValues$nodes[ServerValues$nodes$id == ServerValues$network_selected, ]
+        node_info <- node_info[!is.na(node_info$id), ]
+        ServerValues$data_subset <- getSubset(ServerValues$data, list(q = node_info$id, colname = node_info$colname))
+      }
+    })
     
-    # # Actions to be taken when edge or node selection is changed
-    # observeEvent(c(
-    #   input$current_node_id,
-    #   input$current_edge_index
-    #   ), {
-    #     # Update the information on the external monitor.
-    #     #
-    #     # Event:
-    #     #   Selected node id is changed
-    #     #   Selected edge index is changed
-    #     updateValues()
-    #     # When neither an edge or node is selected
-    #     if(serverValues$current_node_id == -1 && serverValues$current_edge_index == -1){
-    #       serverValues$data_subset <- NULL
-    #     # When node is selected
-    #     } else if(serverValues$current_node_id != -1) {
-    #       query <- serverValues$current_node_id
-    #       serverValues$data_subset <- getDataSubset(serverValues$data, query)
-    #     # When edge is selected
-    #     } else if(serverValues$current_edge_index != -1) {
-    #       edge <- serverValues$edges[serverValues$edges$index == serverValues$current_edge_index, ]
-    #       query <- c(as.character(edge$to), as.character(edge$from))
-    #       serverValues$data_subset <- getDataSubset(serverValues$data, query)
-    #     }
-    #   })
-    # 
-    # # Observe when a node is chosen to be deleted after a doubleclick, the
-    # # remove the data associated
-    # observeEvent(input$delete_node, {
-    #   # Update the data when a node is deleted.
-    #   #
-    #   # Event:
-    #   #   Node is double clicked on the floor
-    #   updateValues()
-    #   index <- which(serverValues$queries %in% serverValues$delete_node)
-    #   serverValues$queries[index] <- NA
-    #   serverValues$data_subset <- NULL
-    #   serverValues$data <- serverValues$data %>%
-    #                          filter(query != serverValues$delete_node)
-    #   serverValues$col_list <- UpdateWall(serverValues$data, serverValues$queries)
-    # })
-    # 
+    # Observe when an edge is clicked.
+    observeEvent(input$network_selected_e, {
+      updateValues()
+      if(ServerValues$network_selected_e != "")
+      {
+        edge_info <- ServerValues$edges[ServerValues$network_selected_e, ]
+        to_info <- ServerValues$nodes[ServerValues$nodes$id == edge_info$to, ]
+        to_info <- to_info[!is.na(to_info$id), ]
+        to_query <- list(q = edge_info$to, colname = to_info$colname)
+        from_info <- ServerValues$nodes[ServerValues$nodes$id == edge_info$from, ]
+        from_info <- from_info[!is.na(from_info$id), ]
+        from_query <- list(q = edge_info$from, colname = from_info$colname)
+        ServerValues$data_subset <- getEdgeSubset(ServerValues$data, to_query, from_query, ServerValues$edge_colname)
+      }
+    })
+  
+    # Observe when a node is chosen to be deleted after a doubleclick, the
+    # remove the data associated
+    observeEvent(input$delete_node, {
+      # Update the data when a node is deleted.
+      #
+      # Event:
+      #   Node is double clicked on the floor
+      updateValues()
+      serverValues$data_subset <- NULL
+      # serverValues$col_list <- UpdateWall(serverValues$data, serverValues$queries)
+    })
+
     # # Observe when text on the wall is clicked, and update query and wall/floor
     # observeEvent(input$clicked_text, {
     #   # Determine what was clicked on the wall and update the appropriate values.

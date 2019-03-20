@@ -237,6 +237,7 @@ getEdges <- function(data, node_queries, edge_colname)
                                     edge_colname))
     }
   }
+  edges$id <- 1:nrow(edges)
   edges
 }
 
@@ -253,5 +254,8 @@ getNetwork <- function(nodes, edges)
     # After drawing the network, center on 0,0 to keep position
     # independant of node number
     visPhysics(stabilization = FALSE, enabled = FALSE) %>%
-    visInteraction(dragView = FALSE, zoomView = FALSE)
+    visInteraction(dragView = FALSE, zoomView = FALSE) %>%
+    visOptions(nodesIdSelection = TRUE) %>%
+    visEvents(deselectEdge = "function(e) {Shiny.onInputChange('network_selected_e', '');}") %>%
+    visEvents(selectEdge = "function(e) {if(e.nodes.length == 0){Shiny.onInputChange('network_selected_e', e.edges);}}")
 }
