@@ -10,24 +10,24 @@ source("app-only-auth-twitter.R")
 source("src/data.R")
 source("src/floor.R")
 source("src/wall.R")
-source("src/data2.R")
+source("src/network.R")
 source("src/external-monitor.R")
 source("src/utilities.R")
 source("src/campfire_lib.R")
-source("src/utils2.R")
 
 campfireApp(
   
   controller = div(
     h1("Controller"),
-    textAreaInput("queries_string", "Search Queries", height = '200px'),
-    selectInput(inputId = "edge_type",
-                label = "Edge Type:",
-                choices = list("hashtag", "tweet"),
-                selected = "hashtag"
-                ),
+    fileInput("json_file", "JSON Input", accept = c("application/json")),
+    # textAreaInput("queries_string", "Search Queries", height = '200px'),
+    # selectInput(inputId = "edge_type",
+    #             label = "Edge Type:",
+    #             choices = list("hashtag", "tweet"),
+    #             selected = "hashtag"
+    #             ),
     actionButton(inputId = "update",
-                 label = "Update"),
+                  label = "Update"),
     style = "position: absolute; 
     top: 50%; left: 50%; 
     margin-right: -50%; 
