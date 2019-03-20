@@ -1,6 +1,5 @@
 library(shiny)
 library(visNetwork)
-library(rtweet)
 library(tidyverse)
 library(ggplot2)
 library(useful)
@@ -20,7 +19,7 @@ campfireApp(
   controller = div(
     h1("Controller"),
     fileInput("json_file", "JSON Input", accept = c("application/json")),
-    # textAreaInput("queries_string", "Search Queries", height = '200px'),
+    textAreaInput("text_input", "JSON Text", height = '200px'),
     # selectInput(inputId = "edge_type",
     #             label = "Edge Type:",
     #             choices = list("hashtag", "tweet"),
@@ -74,8 +73,15 @@ campfireApp(
   )),
   
   serverFunct = function(ServerValues, output, session) {
+    
+    # Update text box when JSON file changes.
+    observeEvent(ServerValues$json_file, {
+      text <- read_file(ServerValues$json_file$datapath)
+      updateTextInput(session, "text_input", value = text)
+    })
 
-    output$network <- renderVisNetwork({
+    output$network <- renderVisNetwork(
+    {
       ServerValues$network
       # if(!is.null(serverValues$nodes)) {
       #   nodes_with_coords <- getCoords(serverValues$nodes)
@@ -138,31 +144,38 @@ campfireApp(
       # }
     })
     
-    # output$tweets_info <- renderUI({
-    #   if(serverValues$current_node_id == -1 && serverValues$current_edge_index == -1) {
-    #     tags$div(
-    #       tags$h1(style = paste0("color:", color.blue), "Twitter Network Explorer"),
-    #       tags$h2(style = paste0("color:", color.blue), paste("Total number of tweets found:", nrow(serverValues$data)))  
-    #     )
-    #   } else if(serverValues$current_node_id != -1) {
-    #     node.name <- serverValues$current_node_id
-    #     node.size <- nrow(serverValues$data_subset)
-    #     tags$div(
-    #       tags$h1(style = paste0("color:", color.blue), node.name),
-    #       tags$h2(style = paste0("color:", color.blue), paste("Size:", node.size))
-    #     )
-    #   } else if(serverValues$current_edge_index != -1) {
-    #     edge <- serverValues$edges[serverValues$edges$index == serverValues$current_edge_index, ]
-    #     query <- c(as.character(edge$to), as.character(edge$from))
-    #     edge.name <- paste(query, collapse = " AND ")
-    #     edge.size <- nrow(serverValues$data_subset)
-    #     tags$div(
-    #       tags$h1(style = paste0("color:", color.blue), edge.name),
-    #       tags$h2(style = paste0("color:", color.blue), paste("Size:", edge.size))
-    #     )
-    #   }
-    # })
-    # 
+    output$tweets_info <- renderUI(
+    {
+      if(ServerValues$network_selected != "")
+      {
+        node_name <- ServerValues$nodes$label[ServerValues$nodes$id == ServerValues$network_selected]
+        node_name <- node_name[!is.na(node_name)]
+        node_size <- nrow(ServerValues$data_subset)
+        tags$div(
+          tags$h1(style = paste0("color:", color.blue), node_name),
+          tags$h2(style = paste0("color:", color.blue), paste("Size:", node_size)))
+      }
+      else if(ServerValues$network_selected_e != "")
+      {
+        edge_data <- ServerValues$edges[ServerValues$network_selected_e, ]
+        to_node_name <- ServerValues$nodes$label[ServerValues$nodes$id == edge_data$to]
+        to_node_name <- to_node_name[!is.na(to_node_name)]
+        from_node_name <- ServerValues$nodes$label[ServerValues$nodes$id == edge_data$from]
+        from_node_name <- from_node_name[!is.na(from_node_name)]
+        edge_name <- paste(to_node_name, "AND", from_node_name)
+        edge_size <- nrow(ServerValues$data_subset)
+        tags$div(
+          tags$h1(style = paste0("color:", color.blue), edge_name),
+          tags$h2(style = paste0("color:", color.blue), paste("Size:", edge_size)))
+      }
+      else
+      {
+        tags$div(
+          tags$h1(style = paste0("color:", color.blue), "Twitter Time Machine"),
+          tags$h2(style = paste0("color:", color.blue), paste("Total number of tweets:", nrow(ServerValues$data))))
+      }
+    })
+    
     # output$wall_ui <- renderUI({
     #   fluidPage(
     #     tags$script(HTML(
@@ -254,14 +267,6 @@ campfireApp(
     #     redirectScript <- paste0("window = window.open('", "https://docs.google.com/presentation/d/1g_q5qQTJAt4jVekozFlEsnEo4XdveubVzLC2t9aeWlo/present", "');")
     #     tags$script(HTML(redirectScript))
     #   }
-    # })
-    # 
-    # observeEvent(serverValues$queries, {
-    #   text <- serverValues$queries[!is.na(serverValues$queries)]
-    #   for(i in which(grepl("\\s", text))) {
-    #     text[i] <- paste0('"', text[i], '"')
-    #   }
-    #   updateTextInput(session, "queries_string", value = paste0(text, collapse = " "))
     # })
     # 
     # observeEvent(serverValues$current_node_id, {
