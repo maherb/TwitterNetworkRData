@@ -11,13 +11,16 @@ updateWall <- function(data, nodes) {
   #   List of Shiny HTML columns containing tweet data.
   col_list <- vector("list", 12)
   col_list <- lapply(1:12, function(col_num) {
-    if(!(col_num %in% nodes$position_)) {
+    if(is.na(nodes$id[col_num]))
+    {
       column(width = 1,
-             textInput(paste0("text.column.", col_num), label = ""),
-             actionButton(paste0("button.column.", col_num), "Submit"))
-    } else {
-      current_node_data <- nodes[nodes$position_ == col_num, ]
-      data_subset <- getDataSubset(data, current_node_data$id)
+        textInput(paste0("text.column.", col_num), label = ""),
+        actionButton(paste0("button.column.", col_num), "Submit"))
+    }
+    else
+    {
+      current_node_data <- nodes[col_num, ]
+      data_subset <- getDataSubset(data, list(q = current_node_data$id, colname = current_node_data$colname))
       UpdateColumn(data_subset, current_node_data, nodes$id)
     }
   })
