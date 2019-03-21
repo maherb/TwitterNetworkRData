@@ -40,11 +40,12 @@ UpdateColumn <- function(data_subset, current_node_data, queries) {
   #
   # Returns:
   #   List of Shiny html columns containing tweet data.
-  # header_text <- getGroupName(5, as.integer(current_node_data$label))
+  print(current_node_data)
+  header_text <- current_node_data$label
   column(width = 1,
          tags$div(includeCSS("wall.css"),
                   fluidRow(
-                    #tags$h2(tags$span(class = "clickable", header_text))
+                    tags$h2(tags$span(class = "clickable", header_text))
                   ),
                   fluidRow(style = 'height: 600px;
                   overflow-y: auto;
