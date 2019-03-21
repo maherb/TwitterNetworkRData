@@ -49,21 +49,21 @@
         "q" : "6",
         "colname" : "group"
       },
-      "name" : "Group 6"
+      "name" : "MAINSTREAM NEWS 1"
     },
     "node08" : {
       "query" : {
         "q" : "7",
         "colname" : "group"
       },
-      "name" : "MAINSTREAM NEWS 1"
+      "name" : "MAINSTREAM NEWS 2"
     },
     "node09" : {
       "query" : {
         "q" : "8",
         "colname" : "group"
       },
-      "name" : "MAINSTREAM NEWS 2"
+      "name" : "SPANISH/ENG NEWS",
     },
     "node10" : {
       "query" : {
