@@ -7,35 +7,35 @@
         "q" : "1",
         "colname" : "group"
       },
-      "name" : "Group 1"
+      "name" : "BLM 1"
     },
     "node02" : {
       "query" : {
         "q" : "2",
         "colname" : "group"
       },
-      "name" : "Group 2"
+      "name" : "BIPARTISAN + ANONYMOUS"
     },
     "node03" : {
       "query" : {
         "q" : "3",
         "colname" : "group"
       },
-      "name" : "Group 3"
+      "name" : "BLM 2"
     },
     "node04" : {
       "query" : {
         "q" : "4",
         "colname" : "group"
       },
-      "name" : "Group 4"
+      "name" : "BLACK ENTERTAINERS"
     },
     "node05" : {
       "query" : {
         "q" : "5",
         "colname" : "group"
       },
-      "name" : "Group 5"
+      "name" : "CONSERVATIVES"
     },
     "node06" : {
       "query" : {
@@ -56,28 +56,28 @@
         "q" : "7",
         "colname" : "group"
       },
-      "name" : "Group 7"
+      "name" : "MAINSTREAM NEWS 1"
     },
     "node09" : {
       "query" : {
         "q" : "8",
         "colname" : "group"
       },
-      "name" : "Group 8"
+      "name" : "MAINSTREAM NEWS 2"
     },
     "node10" : {
       "query" : {
         "q" : "9",
         "colname" : "group"
       },
-      "name" : "Group 9"
+      "name" : "TWITTER HUMOR"
     },
     "node11" : {
      "query" : {
         "q" : "10",
         "colname" : "group"
       },
-      "name" : "Group 10"
+      "name" : "YBT"
     },
     "node12" : {
       "query" : {
