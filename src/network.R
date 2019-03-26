@@ -121,7 +121,7 @@ getNode <- function(data, node_query)
   node <- data.frame(id = node_query$query$q,
                      label = node_query$name,
                      color = color.blue,
-                     font = "10px arial #fd7e14",
+                     font = paste0("10px arial ", color.white),
                      value = node_value,
                      x = 0,
                      y = 0,
