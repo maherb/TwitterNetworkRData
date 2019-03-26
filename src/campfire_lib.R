@@ -42,13 +42,25 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
         incProgress(0, detail = "Getting Tweets", session = d)
         if(!is.null(ServerValues$json_file))
         {
-          parsed_json <- fromJSON(ServerValues$json_file$datapath, nullValue = NA, simplify = FALSE)
-          ServerValues$data <- fetchData(parsed_json$data_file)
-          ServerValues$edge_colname <- parsed_json$edge_colname
-          ServerValues$nodes <- getNodes(ServerValues$data, parsed_json$nodes)
-          ServerValues$edges <- getEdges(ServerValues$data, parsed_json$nodes, ServerValues$edge_colname)
-          ServerValues$network <- getNetwork(ServerValues$nodes, ServerValues$edges)
-          ServerValues$col_list <- updateWall(ServerValues$data, ServerValues$nodes)
+          fp <- ServerValues$json_file$datapath
+          tryCatch({
+            parsed_json <- fromJSON(fp, nullValue = NA, simplify = FALSE)
+            ServerValues$data <- fetchData(parsed_json$data_file)
+            ServerValues$edge_colname <- parsed_json$edge_colname
+            ServerValues$nodes <- getNodes(ServerValues$data, parsed_json$nodes)
+            ServerValues$edges <- getEdges(ServerValues$data, parsed_json$nodes, ServerValues$edge_colname)
+            ServerValues$network <- getNetwork(ServerValues$nodes, ServerValues$edges)
+            ServerValues$col_list <- updateWall(ServerValues$data, ServerValues$nodes)
+          },
+          error=function(err) {
+            print(paste0("Error loading JSON at ", fp))
+            print(err)
+          },
+          warning=function(warning) {
+            print(paste0("Warning loading JSON at ", fp))
+            print(warning)
+          }
+        )
         }
         
         
