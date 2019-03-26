@@ -82,7 +82,7 @@ campfireApp(
 
     output$network <- renderVisNetwork(
     {
-      ServerValues$network
+      ServerValues$network %>%
       # if(!is.null(serverValues$nodes)) {
       #   nodes_with_coords <- getCoords(serverValues$nodes)
       #   visNetwork(nodes_with_coords, serverValues$edges) %>%
@@ -104,45 +104,45 @@ campfireApp(
       #     visPhysics(stabilization = FALSE, enabled = FALSE) %>%
       #     visInteraction(dragView = FALSE, zoomView = FALSE) %>%
       #     # Define behavior when clicking on nodes or edges
-      #     visEvents(
-      #               click = "function(properties) {
-      #                         if(this.getSelectedNodes().length == 1) {
-      #                           Shiny.onInputChange('current_node_id', this.getSelectedNodes()[0]);
-      #                           Shiny.onInputChange('current_edge_index', -1);
-      #                         } else if(this.getSelectedEdges().length == 1) {
-      #                           Shiny.onInputChange('current_edge_index', this.body.data.edges.get(properties.edges[0]).index);
-      #                           Shiny.onInputChange('current_node_id', -1);
-      #                         } else {
-      #                           Shiny.onInputChange('current_node_id', -1);
-      #                           Shiny.onInputChange('current_edge_index', -1);
-      #                         }
-      #                       }",
-      #               doubleClick = "function() {
-      #                                if(this.getSelectedNodes().length == 1) {
-      #                                  Shiny.onInputChange('delete_node', this.getSelectedNodes()[0]);
-      #                                  this.deleteSelected();
-      #                                  Shiny.onInputChange('current_node_id', -1);
-      #                                  Shiny.onInputChange('current_edge_index', -1);
-      #                                }
-      #                              }",
-      #               dragStart = "function() {
-      #                            var sel = this.getSelectedNodes();
-      #                            if(sel.length == 1) {
-      #                              Shiny.onInputChange('current_node_id', this.getSelectedNodes()[0]);
-      #                              Shiny.onInputChange('current_edge_index', -1)
-      #                              Shiny.onInputChange('start_position', this.getPositions(sel[0]))
-      #                            }
-      #                          }",
-      #               dragEnd = "function() {
-      #                            var sel = this.getSelectedNodes();
-      #                            if(sel.length == 1) {
-      #                              Shiny.onInputChange('end_position', this.getPositions(sel[0]))
-      #                            }
-      #                          }"
-      #             )
-      #             
-      # }
-    })
+          visEvents(
+                    # click = "function(properties) {
+                    #           if(this.getSelectedNodes().length == 1) {
+                    #             Shiny.onInputChange('current_node_id', this.getSelectedNodes()[0]);
+                    #             Shiny.onInputChange('current_edge_index', -1);
+                    #           } else if(this.getSelectedEdges().length == 1) {
+                    #             Shiny.onInputChange('current_edge_index', this.body.data.edges.get(properties.edges[0]).index);
+                    #             Shiny.onInputChange('current_node_id', -1);
+                    #           } else {
+                    #             Shiny.onInputChange('current_node_id', -1);
+                    #             Shiny.onInputChange('current_edge_index', -1);
+                    #           }
+                    #         }",
+                    doubleClick = "function() {
+                                     if(this.getSelectedNodes().length == 1) {
+                                       Shiny.onInputChange('delete_node', this.getSelectedNodes()[0]);
+                                       this.deleteSelected();
+                                       Shiny.onInputChange('current_node_id', -1);
+                                       Shiny.onInputChange('current_edge_index', -1);
+                                     }
+                                   }"
+                    # dragStart = "function() {
+                    #              var sel = this.getSelectedNodes();
+                    #              if(sel.length == 1) {
+                    #                Shiny.onInputChange('current_node_id', this.getSelectedNodes()[0]);
+                    #                Shiny.onInputChange('current_edge_index', -1)
+                    #                Shiny.onInputChange('start_position', this.getPositions(sel[0]))
+                    #              }
+                    #            }",
+                    # dragEnd = "function() {
+                    #              var sel = this.getSelectedNodes();
+                    #              if(sel.length == 1) {
+                    #                Shiny.onInputChange('end_position', this.getPositions(sel[0]))
+                    #              }
+                    #            }"
+                  )
+
+      }
+    )
     
     output$tweets_info <- renderUI(
     {

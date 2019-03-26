@@ -40,7 +40,6 @@ UpdateColumn <- function(data_subset, current_node_data, queries) {
   #
   # Returns:
   #   List of Shiny html columns containing tweet data.
-  print(current_node_data)
   header_text <- current_node_data$label
   column(width = 1,
          tags$div(includeCSS("wall.css"),
