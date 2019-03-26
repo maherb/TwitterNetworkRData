@@ -12,7 +12,7 @@ getNodes <- function(data, queries) {
   #     id  label  color  font  value  x  y 
   if(length(queries[!is.na(queries)]) != 0) {
     nodes <- data.frame(id = queries[!is.na(queries)],
-                        color = color.blue,
+                        color = color.white,
                         font = "10px arial #fd7e14")
     nodes$id <- getNodesId(queries)
     nodes$label <- getNodesLabel(queries)
