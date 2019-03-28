@@ -85,7 +85,6 @@ campfireApp(
     {
       if (!is.null(ServerValues$network)) {
         ServerValues$network %>%
-        # if(!is.null(serverValues$nodes)) {
         #   nodes_with_coords <- getCoords(serverValues$nodes)
         #   visNetwork(nodes_with_coords, serverValues$edges) %>%
         #     visEdges(scaling = list("min" = 0), smooth = list("enabled" = TRUE)) %>%

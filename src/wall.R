@@ -13,9 +13,7 @@ updateWall <- function(data, nodes) {
   col_list <- lapply(1:12, function(col_num) {
     if(is.na(nodes$id[col_num]) | nodes$hidden[col_num])
     {
-      column(width = 1,
-        textInput(paste0("text.column.", col_num), label = ""),
-        actionButton(paste0("button.column.", col_num), "Submit"))
+      getEmptyColumn(col_num)
     }
     else
     {
@@ -27,7 +25,11 @@ updateWall <- function(data, nodes) {
   col_list
 }
 
-
+getEmptyColumn <- function(col_num) {
+  column(width = 1,
+         textInput(paste0("text.column.", col_num), label = ""),
+         actionButton(paste0("button.column.", col_num), "Submit"))
+}
 
 
 UpdateColumn <- function(data_subset, current_node_data, queries) {

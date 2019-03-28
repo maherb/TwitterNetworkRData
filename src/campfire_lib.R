@@ -145,7 +145,9 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
       # Event:
       #   Node is double clicked on the floor
       #ServerValues$nodes <- ServerValues$nodes[ServerValues$nodes$id != input$delete_node, ]
-      ServerValues$nodes[!is.na(ServerValues$nodes$id) & ServerValues$nodes$id == input$delete_node, ]$hidden <- TRUE
+      deletedIndex <- !is.na(ServerValues$nodes$id) & ServerValues$nodes$id == input$delete_node
+      ServerValues$nodes[deletedIndex, ]$hidden <- TRUE
+      ServerValues$col_list[deletedIndex, ] <- getEmptyColumn(deletedIndex[1])
       ServerValues$col_list <- updateWall(ServerValues$data, ServerValues$nodes)
       updateValues()
       #serverValues$data_subset <- NULL
