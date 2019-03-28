@@ -21,6 +21,7 @@ fetchData <- function(Rdata_file) {
 #' @return Subset of main data based on query and type.
 getSubset <- function(data, subset_query)
 {
+  #print(subset_query)
   if(subset_query$colname %in% colnames(data))
   {
     contains <- vector(length = nrow(data))
@@ -126,6 +127,7 @@ getNode <- function(data, node_query)
                      x = 0,
                      y = 0,
                      colname = node_query$query$colname,
+                     colvalue = node_query$query$q,
                      hidden = is.na(node_value),
                      stringsAsFactors = FALSE)
   node

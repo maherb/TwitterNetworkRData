@@ -144,7 +144,8 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
       #
       # Event:
       #   Node is double clicked on the floor
-      ServerValues$nodes <- ServerValues$nodes[ServerValues$nodes$id != input$delete_node, ]
+      #ServerValues$nodes <- ServerValues$nodes[ServerValues$nodes$id != input$delete_node, ]
+      ServerValues$nodes[!is.na(ServerValues$nodes$id) & ServerValues$nodes$id == input$delete_node, ]$hidden <- TRUE
       ServerValues$col_list <- updateWall(ServerValues$data, ServerValues$nodes)
       updateValues()
       #serverValues$data_subset <- NULL
@@ -239,13 +240,14 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
       
       
     # })
-    
     # Observe all wall buttons, then update query and wall/floor
     observeEvent({
       input$button.column.1
     }, {
       updateValues()
       ServerValues$queries[1] <- ServerValues$text.column.1
+      #newQuery <- parseColumnQuery(input$button.column.1, "col1")
+      #ServerValues$nodes[[1]] <- getNode(ServerValues$data, newQuery)
       updateComplete()
     })
     observeEvent({

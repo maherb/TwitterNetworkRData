@@ -11,6 +11,15 @@ colors <- c("#1D8DEE", "#1dee7e", "#ee7e1d", "#ee1d8d", "#64B0F3", "#64F3A6", "#
 
 # Misc Functions ----------------------------------------------------------
 
+parseColumnQuery <- function(string, name) {
+  if (substring(string, 1, 1) == "#") {
+    hashtagText <- substring(string, 2)
+    query <- createNodeQuery(hashtagText, "hashtags", name)
+    return(query)
+  }
+  return(NULL)
+}
+
 StringQueryToVector <- function(queries_string) {
   # Converts a string of queries to a vector of queries
   # 

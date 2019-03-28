@@ -11,7 +11,7 @@ updateWall <- function(data, nodes) {
   #   List of Shiny HTML columns containing tweet data.
   col_list <- vector("list", 12)
   col_list <- lapply(1:12, function(col_num) {
-    if(is.na(nodes$id[col_num]))
+    if(is.na(nodes$id[col_num]) | nodes$hidden[col_num])
     {
       column(width = 1,
         textInput(paste0("text.column.", col_num), label = ""),
