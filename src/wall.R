@@ -31,7 +31,6 @@ getEmptyColumn <- function(col_num) {
          actionButton(paste0("button.column.", col_num), "Submit"))
 }
 
-
 UpdateColumn <- function(data_subset, current_node_data, queries) {
   # Creates a single Shiny HTMl column containing tweet data for specific single query.
   # 
