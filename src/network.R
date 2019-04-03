@@ -10,6 +10,12 @@ fetchData <- function(Rdata_file) {
   data$hashtags <- lapply(data$hashtags, function(x) {
     unlist(x)
   })
+  data$user_mentions <- lapply(data$user_mentions, function(x) {
+    unlist(x)
+  })
+  data$expanded_urls <- lapply(data$expanded_urls, function(x) {
+    unlist(x)  
+  })
   remove(df_name)
   return(data)
 }
@@ -50,7 +56,7 @@ getSubsetColname <- function(data, subset_queries, colname)
 {
   queries <- sapply(subset_queries, function(x){
     x$q
-    })
+  })
   if(colname %in% colnames(data))
   {
     contains <- vector(length = nrow(data))
@@ -220,21 +226,31 @@ getEdge <- function(data, to_query, from_query, colname)
 #' @param subset_queries List of query objects to subset from.  
 #' @param edge_colname Column name to search in to create edges.
 #' @returns Dataframe of edge data.
-getEdges <- function(data, node_queries, edge_colname)
+getEdges <- function(data, node_queries, edge_colnames)
 {
+  
   subset_queries <- lapply(node_queries, function(x) {
     x$query
   })
   edges <- data.frame()
   node_combinations <- combn(1:length(subset_queries), 2)
+  rounds <- seq(0, .5, length.out = length(edge_colnames))
+  edge_colors <- c("#c51f5d", "white", "#008080")
   for(i in 1:ncol(node_combinations))
   {
     if(!is.na(subset_queries[[node_combinations[ ,i][1]]]) && !is.na(subset_queries[[node_combinations[ ,i][2]]]))
     {
-      edges <- rbind(edges, getEdge(data,
-                                    subset_queries[[node_combinations[ ,i][1]]],
-                                    subset_queries[[node_combinations[ ,i][2]]],
-                                    edge_colname))
+      for(j in 1:length(edge_colnames))
+      {
+        edge <- getEdge(data,
+                        subset_queries[[node_combinations[ ,i][1]]],
+                        subset_queries[[node_combinations[ ,i][2]]],
+                        edge_colnames[[j]])
+        edge$colname <- edge_colnames[[j]]
+        edge$color <- edge_colors[[j]]
+        edge$smooth <- list(list("type" = "continuous", "roundness" = rounds[[j]]))
+        edges <- rbind(edges, edge)
+      }
     }
   }
   edges$id <- 1:nrow(edges)
@@ -249,11 +265,13 @@ getNetwork <- function(nodes, edges)
 {
   nodes <- nodes[!is.na(nodes$id), ]
   visNetwork(nodes, edges) %>%
-    visEdges(scaling = list("min" = 0), smooth = list("enabled" = TRUE)) %>%
+    visEdges(scaling = list("min" = 0), smooth = list("enabled" = TRUE, type = "dynamic")) %>%
     visNodes(scaling = list("min" = 10, "max" = 50)) %>%
     # After drawing the network, center on 0,0 to keep position
     # independant of node number
     visPhysics(stabilization = FALSE, enabled = FALSE) %>%
+    #visPhysics(solver = "barnesHut", 
+    #           barnesHut = list(springConstant = 0)) %>%
     visInteraction(dragView = FALSE, zoomView = FALSE) %>%
     visOptions(nodesIdSelection = TRUE) %>%
     visEvents(deselectEdge = "function(e) {Shiny.onInputChange('network_selected_e', '');}") %>%
