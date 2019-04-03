@@ -17,9 +17,7 @@ updateWall <- function(data, nodes) {
     }
     else
     {
-      current_node_data <- nodes[col_num, ]
-      data_subset <- getSubset(data, list(q = current_node_data$id, colname = current_node_data$colname))
-      UpdateColumn(data_subset, current_node_data, nodes$id)
+      getColumn(data, nodes[col_num, ])
     }
   })
   col_list
@@ -29,6 +27,11 @@ getEmptyColumn <- function(col_num) {
   column(width = 1,
          textInput(paste0("text.column.", col_num), label = ""),
          actionButton(paste0("button.column.", col_num), "Submit"))
+}
+
+getColumn <- function(data, current_node_data) {
+  data_subset <- getSubset(data, list(q = current_node_data$id, colname = current_node_data$colname))
+  UpdateColumn(data_subset, current_node_data, nodes$id)
 }
 
 UpdateColumn <- function(data_subset, current_node_data, queries) {
