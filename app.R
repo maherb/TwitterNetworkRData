@@ -20,11 +20,7 @@ campfireApp(
     h1("Controller"),
     fileInput("json_file", "JSON Input", accept = c("application/json")),
     textAreaInput("text_input", "JSON Text", height = '200px'),
-    # selectInput(inputId = "edge_type",
-    #             label = "Edge Type:",
-    #             choices = list("hashtag", "tweet"),
-    #             selected = "hashtag"
-    #             ),
+    #checkboxGroupInput("edge_input", "Select Edges", c("hashtags", "groups")),
     actionButton(inputId = "update",
                   label = "Update"),
     style = "position: absolute; 
@@ -167,6 +163,7 @@ campfireApp(
         edge_size <- nrow(ServerValues$data_subset)
         tags$div(
           tags$h1(style = paste0("color:", color.blue), edge_name),
+          tags$h1(style = paste0("color:", color.blue), paste("Type:", edge_data$colname)),
           tags$h2(style = paste0("color:", color.blue), paste("Size:", edge_size)))
       }
       else

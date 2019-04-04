@@ -1,6 +1,6 @@
 {
-  "data_file" : "data/period_5.df.Rdata",
-  "edge_colname" : "hashtags",
+  "data_file" : "data/period_5_4.df.Rdata",
+  "edge_colnames" : ["hashtags", "user_mentions", "expanded_urls"],
   "nodes" : {
     "node01" : {
       "query" : {
