@@ -46,7 +46,7 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
           tryCatch({
             parsed_json <- fromJSON(fp, nullValue = NA, simplify = FALSE)
             ServerValues$data <- fetchData(parsed_json$data_file)
-            ServerValues$edge_colname <- parsed_json$edge_colname
+            ServerValues$edge_colnames <- parsed_json$edge_colnames
             ServerValues$nodes <- getNodes(ServerValues$data, parsed_json$nodes)
             ServerValues$edges <- getEdges(ServerValues$data, parsed_json$nodes, ServerValues$edge_colname)
             ServerValues$network <- getNetwork(ServerValues$nodes, ServerValues$edges)
@@ -133,7 +133,7 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
         from_info <- ServerValues$nodes[ServerValues$nodes$id == edge_info$from, ]
         from_info <- from_info[!is.na(from_info$id), ]
         from_query <- list(q = edge_info$from, colname = from_info$colname)
-        ServerValues$data_subset <- getEdgeSubset(ServerValues$data, to_query, from_query, ServerValues$edge_colname)
+        ServerValues$data_subset <- getEdgeSubset(ServerValues$data, to_query, from_query, edge_info$colname)
       }
     })
   

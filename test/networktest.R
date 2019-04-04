@@ -12,22 +12,23 @@ createNodeQuery <- function(q, colname, name)
 
 color.blue <- "#1D8DEE"
 
-load("data/period_5.df.Rdata")
-data <- fetchData("data/period_5.df.Rdata")
-
-query1 <- createNodeQuery("ferguson", "hashtags", "ferguson")
-query2 <- createNodeQuery("Ferguson", "hashtags", "Ferguson")
-query3 <- createNodeQuery("LAPD", "hashtags", "LAPD")
-query4 <- createNodeQuery("1", "group", "group1")
-
-subsets <- getSubset2OR(data, list(query1$query, query2$query))
-
-node1 <- getNode(data, query1)
-
-nodes <- getNodes(data, list(query1, query2))
-
-edge <- getEdge(data, query1$q, query2$q, "group")
-
-edges <- getEdges(data, list(query1$q, query2$q, query3$q), "group")
-
-getNetwork(data, list(query1, query2, query3, query4), "group")
+parsed_json <- fromJSON("test/test_ALLGROUPS.json", nullValue = NA, simplify = FALSE)
+data <- fetchData(parsed_json$data_file)
+data$test <- sample(1:10, nrow(data), replace = T)
+edge_colname <- parsed_json$edge_colname
+nodes <- getNodes(data, parsed_json$nodes)
+edges <- getEdges(data, parsed_json$nodes, edge_colname)
+edges$color <- "black"
+edges2 <- getEdges(data, parsed_json$nodes, "test")
+edges2$color <- "red"
+edges <- rbind(edges, edges2)
+edges$id <- 1:nrow(edges)
+edges$smooth <- rep(list(list("type" = "continuous")), nrow(edges))
+for(i in 1:nrow(edges))
+{
+  rounds = c(0, .5)
+  index = (1:2)[edges$color[[i]] == unique(edges$color)]
+  edges$smooth[[i]][["roundness"]] = rounds[index]
+}
+View(edges)
+getNetwork(nodes, edges)
