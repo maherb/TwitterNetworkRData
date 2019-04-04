@@ -2,7 +2,7 @@
 color.green <- "#1dee7e"
 color.pink <- "#ee1d8d"
 color.orange <- "#ee7e1d"
-color.white <- "#f0f0f0"
+color.white <- "#ffffff"
 color.blue <- "#1D8DEE"
 color.back <- "#151E29"
 color.offback <- "#1B2737"
@@ -10,6 +10,23 @@ colors <- c("#1D8DEE", "#1dee7e", "#ee7e1d", "#ee1d8d", "#64B0F3", "#64F3A6", "#
 
 
 # Misc Functions ----------------------------------------------------------
+
+parseColumnQuery <- function(string, name) {
+  if (substring(string, 1, 1) == "#") {
+    hashtagText <- substring(string, 2)
+    query <- createNodeQuery(hashtagText, "hashtags", name)
+    return(query)
+  }
+  return(NULL)
+}
+
+createNodeQuery <- function(q, colname, name)
+{
+  query <- structure(list(q = q, colname = colname), class = "Query")
+  node_query <- structure(list(query = query, name = name), class = "NodeQuery")
+  node_query
+}
+
 
 StringQueryToVector <- function(queries_string) {
   # Converts a string of queries to a vector of queries

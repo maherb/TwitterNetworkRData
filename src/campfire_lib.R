@@ -42,13 +42,25 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
         incProgress(0, detail = "Getting Tweets", session = d)
         if(!is.null(ServerValues$json_file))
         {
-          parsed_json <- fromJSON(ServerValues$json_file$datapath, nullValue = NA, simplify = FALSE)
-          ServerValues$data <- fetchData(parsed_json$data_file)
-          ServerValues$edge_colnames <- parsed_json$edge_colnames
-          ServerValues$nodes <- getNodes(ServerValues$data, parsed_json$nodes)
-          ServerValues$edges <- getEdges(ServerValues$data, parsed_json$nodes, ServerValues$edge_colnames)
-          ServerValues$network <- getNetwork(ServerValues$nodes, ServerValues$edges)
-          ServerValues$col_list <- updateWall(ServerValues$data, ServerValues$nodes)
+          fp <- ServerValues$json_file$datapath
+          tryCatch({
+            parsed_json <- fromJSON(fp, nullValue = NA, simplify = FALSE)
+            ServerValues$data <- fetchData(parsed_json$data_file)
+            ServerValues$edge_colnames <- parsed_json$edge_colnames
+            ServerValues$nodes <- getNodes(ServerValues$data, parsed_json$nodes)
+            ServerValues$edges <- getEdges(ServerValues$data, parsed_json$nodes, ServerValues$edge_colnames)
+            ServerValues$network <- getNetwork(ServerValues$nodes, ServerValues$edges)
+            ServerValues$col_list <- updateWall(ServerValues$data, ServerValues$nodes)
+          },
+          error=function(err) {
+            print(paste0("Error loading JSON at ", fp))
+            print(err)
+          },
+          warning=function(warning) {
+            print(paste0("Warning loading JSON at ", fp))
+            print(warning)
+          }
+        )
         }
         
         
@@ -132,8 +144,12 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
       #
       # Event:
       #   Node is double clicked on the floor
+      #ServerValues$nodes <- ServerValues$nodes[ServerValues$nodes$id != input$delete_node, ]
+      deletedIndex <- which(!is.na(ServerValues$nodes$id) & ServerValues$nodes$id == input$delete_node)[1]
+      ServerValues$nodes[deletedIndex]$hidden <- TRUE
+      ServerValues$col_list[[deletedIndex]] <- getEmptyColumn(deletedIndex)
       updateValues()
-      serverValues$data_subset <- NULL
+      #serverValues$data_subset <- NULL
       # serverValues$col_list <- UpdateWall(serverValues$data, serverValues$queries)
     })
 
@@ -225,90 +241,125 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
       
       
     # })
-    
     # Observe all wall buttons, then update query and wall/floor
     observeEvent({
       input$button.column.1
     }, {
       updateValues()
-      ServerValues$queries[1] <- ServerValues$text.column.1
+      newQuery <- parseColumnQuery(input$text.column.1, input$text.column.1)
+      newNode <- getNode(ServerValues$data, newQuery)
+      ServerValues$nodes[1, ] <- newNode
+      ServerValues$col_list[[1]] <- getColumn(ServerValues$data, newNode) 
       updateComplete()
     })
     observeEvent({
       input$button.column.2
     }, {
       updateValues()
-      ServerValues$queries[2] <- ServerValues$text.column.2
+      newQuery <- parseColumnQuery(input$text.column.2, input$text.column.2)
+      newNode <- getNode(ServerValues$data, newQuery)
+      ServerValues$nodes[2, ] <- newNode
+      ServerValues$col_list[[2]] <- getColumn(ServerValues$data, newNode) 
       updateComplete()
     })
     observeEvent({
       input$button.column.3
     }, {
       updateValues()
-      ServerValues$queries[3] <- ServerValues$text.column.3
+      newQuery <- parseColumnQuery(input$text.column.3, input$text.column.3)
+      newNode <- getNode(ServerValues$data, newQuery)
+      ServerValues$nodes[3, ] <- newNode
+      ServerValues$col_list[[3]] <- getColumn(ServerValues$data, newNode) 
       updateComplete()
     })
     observeEvent({
       input$button.column.4
     }, {
       updateValues()
-      ServerValues$queries[4] <- ServerValues$text.column.4
+      newQuery <- parseColumnQuery(input$text.column.4, input$text.column.4)
+      newNode <- getNode(ServerValues$data, newQuery)
+      ServerValues$nodes[4, ] <- newNode
+      ServerValues$col_list[[4]] <- getColumn(ServerValues$data, newNode) 
       updateComplete()
     })
     observeEvent({
       input$button.column.5
     }, {
       updateValues()
-      ServerValues$queries[5] <- ServerValues$text.column.5
+      newQuery <- parseColumnQuery(input$text.column.5, input$text.column.5)
+      newNode <- getNode(ServerValues$data, newQuery)
+      ServerValues$nodes[5, ] <- newNode
+      ServerValues$col_list[[5]] <- getColumn(ServerValues$data, newNode) 
       updateComplete()
     })
     observeEvent({
       input$button.column.6
     }, {
       updateValues()
-      ServerValues$queries[6] <- ServerValues$text.column.6
+      newQuery <- parseColumnQuery(input$text.column.6, input$text.column.6)
+      newNode <- getNode(ServerValues$data, newQuery)
+      ServerValues$nodes[6, ] <- newNode
+      ServerValues$col_list[[6]] <- getColumn(ServerValues$data, newNode) 
       updateComplete()
     })
     observeEvent({
       input$button.column.7
     }, {
       updateValues()
-      ServerValues$queries[7] <- ServerValues$text.column.7
+      newQuery <- parseColumnQuery(input$text.column.7, input$text.column.7)
+      newNode <- getNode(ServerValues$data, newQuery)
+      ServerValues$nodes[7, ] <- newNode
+      ServerValues$col_list[[7]] <- getColumn(ServerValues$data, newNode) 
       updateComplete()
     })
     observeEvent({
       input$button.column.8
     }, {
       updateValues()
-      ServerValues$queries[8] <- ServerValues$text.column.8
+      newQuery <- parseColumnQuery(input$text.column.8, input$text.column.8)
+      newNode <- getNode(ServerValues$data, newQuery)
+      ServerValues$nodes[8, ] <- newNode
+      ServerValues$col_list[[8]] <- getColumn(ServerValues$data, newNode) 
       updateComplete()
     })
     observeEvent({
       input$button.column.9
     }, {
       updateValues()
-      ServerValues$queries[9] <- ServerValues$text.column.9
+      newQuery <- parseColumnQuery(input$text.column.9, input$text.column.9)
+      newNode <- getNode(ServerValues$data, newQuery)
+      ServerValues$nodes[9, ] <- newNode
+      ServerValues$col_list[[9]] <- getColumn(ServerValues$data, newNode) 
       updateComplete()
     })
     observeEvent({
       input$button.column.10
     }, {
       updateValues()
-      ServerValues$queries[10] <- serverValues$text.column.10
+      newQuery <- parseColumnQuery(input$text.column.10, input$text.column.10)
+      newNode <- getNode(ServerValues$data, newQuery)
+      ServerValues$nodes[10, ] <- newNode
+      ServerValues$col_list[[10]] <- getColumn(ServerValues$data, newNode) 
       updateComplete()
     })
     observeEvent({
       input$button.column.11
     }, {
       updateValues()
-      ServerValues$queries[11] <- ServerValues$text.column.11
+      newQuery <- parseColumnQuery(input$text.column.11, input$text.column.11)
+      newNode <- getNode(ServerValues$data, newQuery)
+      ServerValues$nodes[11, ] <- newNode
+      ServerValues$col_list[[11]] <- getColumn(ServerValues$data, newNode) 
       updateComplete()
     })
     observeEvent({
       input$button.column.12
     }, {
       updateValues()
-      ServerValues$queries[[12]] <- ServerValues$text.column.12
+      newQuery <- parseColumnQuery(input$text.column.12, input$text.column.12)
+      newNode <- getNode(ServerValues$data, newQuery)
+      ServerValues$nodes[12, ] <- newNode
+      ServerValues$col_list[[12]] <- getColumn(ServerValues$data, newNode) 
       updateComplete()
     })
     
