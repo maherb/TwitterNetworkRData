@@ -17,6 +17,11 @@ parseColumnQuery <- function(string, name) {
     query <- createNodeQuery(hashtagText, "hashtags", name)
     return(query)
   }
+  if (substring(string, 1, 1) == "@") {
+    mentionText <- substring(string, 2)
+    query <- createNodeQuery(mentionText, "mentions", name)
+    return(query)
+  }
   return(NULL)
 }
 
