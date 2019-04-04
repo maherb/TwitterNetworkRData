@@ -20,6 +20,14 @@ parseColumnQuery <- function(string, name) {
   return(NULL)
 }
 
+createNodeQuery <- function(q, colname, name)
+{
+  query <- structure(list(q = q, colname = colname), class = "Query")
+  node_query <- structure(list(query = query, name = name), class = "NodeQuery")
+  node_query
+}
+
+
 StringQueryToVector <- function(queries_string) {
   # Converts a string of queries to a vector of queries
   # 

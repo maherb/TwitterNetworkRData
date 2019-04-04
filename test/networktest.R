@@ -2,13 +2,7 @@ library(tidyverse)
 library(visNetwork)
 
 source("src/network.R")
-
-createNodeQuery <- function(q, colname, name)
-{
-  query <- structure(list(q = q, colname = colname), class = "Query")
-  node_query <- structure(list(query = query, name = name), class = "NodeQuery")
-  node_query
-}
+source("src/utilities.R")
 
 color.blue <- "#1D8DEE"
 
