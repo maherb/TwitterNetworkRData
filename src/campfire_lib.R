@@ -48,7 +48,7 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
             ServerValues$data <- fetchData(parsed_json$data_file)
             ServerValues$edge_colnames <- parsed_json$edge_colnames
             ServerValues$nodes <- getNodes(ServerValues$data, parsed_json$nodes)
-            ServerValues$edges <- getEdges(ServerValues$data, parsed_json$nodes, ServerValues$edge_colname)
+            ServerValues$edges <- getEdges(ServerValues$data, parsed_json$nodes, ServerValues$edge_colnames)
             ServerValues$network <- getNetwork(ServerValues$nodes, ServerValues$edges)
             ServerValues$col_list <- updateWall(ServerValues$data, ServerValues$nodes)
           },
