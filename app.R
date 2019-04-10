@@ -36,13 +36,13 @@ campfireApp(
   ),
   
   floor = div(
-    visNetworkOutput("network", width = "1000px", height = "900px"),
+    visNetworkOutput("network", width = "1000px", height = "1000px"),
     style = paste0("position: absolute; 
            top: 50%; left: 50%;
            margin-right: -50%; 
            transform: translate(-50%, -50%);
            background: ", color.back,
-           "; height: 900px; overflow: hidden")
+           "; height: 1000px; overflow: hidden")
   ),
   
   datamonitor = div(fluidPage(
