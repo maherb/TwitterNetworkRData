@@ -123,7 +123,6 @@ getNode <- function(data, node_query)
     node_orig_indices <- unlist(node_subset$orig_index)
   }
   node <- data.frame(id = node_query$query$q,
-                     label = node_query$name,
                      color = color.blue,
                      font = paste0("10px arial ", color.white),
                      value = node_value,
@@ -142,10 +141,11 @@ getNode <- function(data, node_query)
 #' @param nodes Dataframe of node data.
 #' @returns Dataframe of node data with correct positions.
 updatePositions <- function(nodes) {
-  radius <- 5
+  radius <- 6
   scale <- 75
   angles <- rev(seq(0, (3/2)*pi, (2 * pi)/12))
   angles <- c(angles, seq((3/2)*pi, 2*pi, (2 * pi)/12)[3:2])
+  angles <- angles - (angles[1] - angles[2])/2
   for(i in 1:min(nrow(nodes), 12)) 
   {
     nodes$x[i] <- scale * radius * cos(angles[[i]])
@@ -274,7 +274,7 @@ getNetwork <- function(nodes, edges)
   nodes <- nodes[!is.na(nodes$id), ]
   visNetwork(nodes, edges) %>%
     visEdges(scaling = list("min" = 2), smooth = list("enabled" = TRUE, type = "dynamic")) %>%
-    visNodes(scaling = list("min" = 10, "max" = 50)) %>%
+    visNodes(scaling = list("min" = 25, "max" = 75)) %>%
     # After drawing the network, center on 0,0 to keep position
     # independant of node number
     visPhysics(stabilization = FALSE, enabled = FALSE) %>%
