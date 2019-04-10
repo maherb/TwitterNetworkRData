@@ -58,6 +58,7 @@ UpdateColumn <- function(data_subset, current_node_data, queries, col_num) {
                            }
                   )
          )
+  )
 }
 
 # curried function that returns a function to generate the tweet_num'th row from data_subset
