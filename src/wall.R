@@ -54,24 +54,29 @@ UpdateColumn <- function(data_subset, current_node_data, queries) {
                   overflow-y: auto;
                   overflow-x: hidden;',
                            if(nrow(data_subset) > 0) {
-                             lapply(1:nrow(data_subset), function(tweet_num) {
-                              tweetText <- data_subset$full_text[tweet_num]
-                              tweetHashtags <- unlist(data_subset$hashtags[tweet_num])
-                              tweetUrls <- unlist(data_subset$urls[tweet_num])
-                              tweetMentions <- unlist(data_subset$user_mentions[tweet_num])
-                              coloredText <- highlightHashtags(tweetText, tweetHashtags)
-                              coloredText <- highlightUrls(coloredText, tweetUrls)
-                              coloredText <- highlightMentions(coloredText, tweetMentions)
-                              tags$div(style = 'padding: 0px;',
-                                        tags$h3(tags$span(class = "clickable", paste0("@", data_subset$user_screen_name[tweet_num]))),
-                                       tags$p(HTML(coloredText)),
-                                       tags$p(HTML(paste("&#x1F499", data_subset$favorite_count[tweet_num], "&#x1F504", data_subset$retweet_count[tweet_num])))
-                               )
-                             })
+                             lapply(1:nrow(data_subset), makeRow(data_subset) )
                            }
                   )
          )
   )
+}
+
+# curried function that returns a function to generate the tweet_num'th row from data_subset
+makeRow <- function(data_subset) {
+  function(tweet_num) {
+    tweetText <- data_subset$full_text[tweet_num]
+    tweetHashtags <- unlist(data_subset$hashtags[tweet_num])
+    tweetUrls <- unlist(data_subset$urls[tweet_num])
+    tweetMentions <- unlist(data_subset$user_mentions[tweet_num])
+    coloredText <- highlightHashtags(tweetText, tweetHashtags)
+    coloredText <- highlightUrls(coloredText, tweetUrls)
+    coloredText <- highlightMentions(coloredText, tweetMentions)
+    tags$div(style = 'padding: 0px;',
+             tags$h3(tags$span(class = "clickable", paste0("@", data_subset$user_screen_name[tweet_num]))),
+             tags$p(HTML(coloredText)),
+             tags$p(HTML(paste("&#x1F499", data_subset$favorite_count[tweet_num], "&#x1F504", data_subset$retweet_count[tweet_num])))
+    )
+  }
 }
 
 highlightMentions <- function(string, mentions) {
