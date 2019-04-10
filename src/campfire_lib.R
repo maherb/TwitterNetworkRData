@@ -39,18 +39,23 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
         d <- ServerValues$monitor.domain
       }
       withProgress(message = "Reloading...", value = 0, session = d, {
-        incProgress(0, detail = "Getting Tweets", session = d)
         if(!is.null(ServerValues$json_file))
         {
           fp <- ServerValues$json_file$datapath
           tryCatch({
+            incProgress(0, detail = "Getting Data...", session = d)
             parsed_json <- fromJSON(fp, nullValue = NA, simplify = FALSE)
             ServerValues$data <- fetchData(parsed_json$data_file)
             ServerValues$edge_colnames <- parsed_json$edge_colnames
+            incProgress(.2, detail = "Creating Nodes...", session = d)
             ServerValues$nodes <- getNodes(ServerValues$data, parsed_json$nodes)
-            ServerValues$edges <- getEdges(ServerValues$data, parsed_json$nodes, ServerValues$edge_colnames)
+            incProgress(.2, detail = "Creating Edges...", session = d)
+            ServerValues$edges <- getEdges(ServerValues$data, parsed_json$nodes, ServerValues$edge_colnames, ServerValues$nodes)
+            incProgress(.2, detail = "Creating Network...", session = d)
             ServerValues$network <- getNetwork(ServerValues$nodes, ServerValues$edges)
+            incProgress(.2, detail = "Creating Wall...", session = d)
             ServerValues$col_list <- updateWall(ServerValues$data, ServerValues$nodes)
+            incProgress(.2, detail = "Finished", session = d)
           },
           error=function(err) {
             print(paste0("Error loading JSON at ", fp))

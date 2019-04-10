@@ -1,3 +1,5 @@
+count <- 0
+
 #' Fetches tweet from database.
 #'
 #' @param Rdata_file Path to an Rdata file.
@@ -16,6 +18,8 @@ fetchData <- function(Rdata_file) {
   data$expanded_urls <- lapply(data$expanded_urls, function(x) {
     unlist(x)  
   })
+  # Add column to track row of tweet in main dataframe.
+  data$orig_index <- 1:nrow(data)
   remove(df_name)
   return(data)
 }
@@ -27,17 +31,12 @@ fetchData <- function(Rdata_file) {
 #' @return Subset of main data based on query and type.
 getSubset <- function(data, subset_query)
 {
-  #print(subset_query)
   if(subset_query$colname %in% colnames(data))
   {
-    contains <- vector(length = nrow(data))
-    for(i in 1:length(contains))
-    {
-      if(subset_query$q %in% unlist(data[i, subset_query$colname]))
-      {
-        contains[i] = TRUE
-      }
-    }
+    contains <- sapply(1:nrow(data), function(i) {
+      if(subset_query$q %in% unlist(data[i, subset_query$colname])) {TRUE}
+      else {FALSE}
+    })
     data_subset <- filter(data, contains)
   }
   else
@@ -60,14 +59,10 @@ getSubsetColname <- function(data, subset_queries, colname)
   })
   if(colname %in% colnames(data))
   {
-    contains <- vector(length = nrow(data))
-    for(i in 1:length(contains))
-    {
-      if(any(queries %in% unlist(data[i, colname])))
-      {
-        contains[i] = TRUE
-      }
-    }
+    contains <- sapply(1:nrow(data), function(i){
+      if(any(queries %in% unlist(data[i, colname]))) {TRUE}
+      else {FALSE}
+    })
     data_subset <- filter(data, contains)
   }
   else
@@ -120,10 +115,12 @@ getNode <- function(data, node_query)
   if(is.null(node_subset)) 
   {
     node_value <- NA
+    node_orig_indices <- NA
   } 
   else 
   {
     node_value <- nrow(node_subset)
+    node_orig_indices <- unlist(node_subset$orig_index)
   }
   node <- data.frame(id = node_query$query$q,
                      label = node_query$name,
@@ -136,6 +133,7 @@ getNode <- function(data, node_query)
                      colvalue = node_query$query$q,
                      hidden = is.na(node_value),
                      stringsAsFactors = FALSE)
+  node$orig_indices <- list(node_orig_indices)
   node
 }
 
@@ -180,15 +178,22 @@ getNodes <- function(data, node_queries)
 #' @param from_query Query representing the start node.
 #' @param colname Column name to search in to create edges.
 #' @return Subset of data containing rows from to_query, from_query that share common colname content.
-getEdgeSubset <- function(data, to_query, from_query, colname)
+getEdgeSubset <- function(data, to_query, from_query, colname, nodes)
 {
-  to_node_subset <- getSubset(data, to_query)
-  from_node_subset <- getSubset(data, from_query)
+  #print(paste0("starting", count))
+  node1_indices <- nodes$orig_indices[nodes$id == to_query$q][[1]]
+  node2_indices <- nodes$orig_indices[nodes$id == from_query$q][[1]]
+  # node1_indices <- node1_indices$orig_indices
+  # node2_indices <- node2_indices$orig_indices
+  to_node_subset <- data[node1_indices, ]
+  from_node_subset <- data[node2_indices, ]
   subset <- rbind(to_node_subset, from_node_subset)
   to_content <- unique(unlist(to_node_subset[ , colname]))
   from_content <- unique(unlist(from_node_subset[ , colname]))
   shared_content <- intersect(to_content, from_content)
   tmps <- vector(mode = "list", length = length(shared_content))
+  #print(paste0("ending", count))
+  count <<- count + 1
   if(length(shared_content > 0))
   {
     for(i in 1:length(tmps))
@@ -208,10 +213,10 @@ getEdgeSubset <- function(data, to_query, from_query, colname)
 #' @param from_query Query representing the end node.
 #' @param colname Column name to search in to create edges.
 #' @return Edge data frame to to_query from from_query.
-getEdge <- function(data, to_query, from_query, colname)
+getEdge <- function(data, to_query, from_query, colname, nodes)
 {
   size <- 0
-  edge_subset <- getEdgeSubset(data, to_query, from_query, colname)
+  edge_subset <- getEdgeSubset(data, to_query, from_query, colname, nodes)
   if(!is.null(nrow(edge_subset)))
   {
     size <- nrow(edge_subset)
@@ -228,9 +233,9 @@ getEdge <- function(data, to_query, from_query, colname)
 #' @param subset_queries List of query objects to subset from.  
 #' @param edge_colname Column name to search in to create edges.
 #' @returns Dataframe of edge data.
-getEdges <- function(data, node_queries, edge_colnames)
+getEdges <- function(data, node_queries, edge_colnames, nodes)
 {
-  
+  nodes <- nodes[!is.na(nodes$id), ]
   subset_queries <- lapply(node_queries, function(x) {
     x$query
   })
@@ -247,7 +252,8 @@ getEdges <- function(data, node_queries, edge_colnames)
         edge <- getEdge(data,
                         subset_queries[[node_combinations[ ,i][1]]],
                         subset_queries[[node_combinations[ ,i][2]]],
-                        edge_colnames[[j]])
+                        edge_colnames[[j]],
+                        nodes)
         edge$colname <- edge_colnames[[j]]
         edge$color <- edge_colors[[j]]
         edge$smooth <- list(list("type" = "continuous", "roundness" = rounds[[j]]))
@@ -267,7 +273,7 @@ getNetwork <- function(nodes, edges)
 {
   nodes <- nodes[!is.na(nodes$id), ]
   visNetwork(nodes, edges) %>%
-    visEdges(scaling = list("min" = 0), smooth = list("enabled" = TRUE, type = "dynamic")) %>%
+    visEdges(scaling = list("min" = 2), smooth = list("enabled" = TRUE, type = "dynamic")) %>%
     visNodes(scaling = list("min" = 10, "max" = 50)) %>%
     # After drawing the network, center on 0,0 to keep position
     # independant of node number
