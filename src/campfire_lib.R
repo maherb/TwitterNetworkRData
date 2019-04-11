@@ -251,60 +251,42 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
       input$button.column.1
     }, {
       updateValues()
-      newQuery <- parseColumnQuery(input$text.column.1)
-      newNode <- getNode(ServerValues$data, newQuery)
-      ServerValues$nodes[1, ] <- newNode
-      ServerValues$col_list[[1]] <- getColumn(ServerValues$data, newNode, 1) 
+      ServerValues <- updateAll(ServerValues, input$text.column.1, 1) 
       updateComplete()
     })
     observeEvent({
       input$button.column.2
     }, {
       updateValues()
-      newQuery <- parseColumnQuery(input$text.column.2)
-      newNode <- getNode(ServerValues$data, newQuery)
-      ServerValues$nodes[2, ] <- newNode
-      ServerValues$col_list[[2]] <- getColumn(ServerValues$data, newNode, 2) 
+      ServerValues <- updateAll(ServerValues, input$text.column.2, 2) 
       updateComplete()
     })
     observeEvent({
       input$button.column.3
     }, {
       updateValues()
-      newQuery <- parseColumnQuery(input$text.column.3)
-      newNode <- getNode(ServerValues$data, newQuery)
-      ServerValues$nodes[3, ] <- newNode
-      ServerValues$col_list[[3]] <- getColumn(ServerValues$data, newNode, 3) 
+      ServerValues <- updateAll(ServerValues, input$text.column.3, 3) 
       updateComplete()
     })
     observeEvent({
       input$button.column.4
     }, {
       updateValues()
-      newQuery <- parseColumnQuery(input$text.column.4)
-      newNode <- getNode(ServerValues$data, newQuery)
-      ServerValues$nodes[4, ] <- newNode
-      ServerValues$col_list[[4]] <- getColumn(ServerValues$data, newNode, 4) 
+      ServerValues <- updateAll(ServerValues, input$text.column.4, 4)  
       updateComplete()
     })
     observeEvent({
       input$button.column.5
     }, {
       updateValues()
-      newQuery <- parseColumnQuery(input$text.column.5)
-      newNode <- getNode(ServerValues$data, newQuery)
-      ServerValues$nodes[5, ] <- newNode
-      ServerValues$col_list[[5]] <- getColumn(ServerValues$data, newNode, 5) 
+      ServerValues <- updateAll(ServerValues, input$text.column.5, 5) 
       updateComplete()
     })
     observeEvent({
       input$button.column.6
     }, {
       updateValues()
-      newQuery <- parseColumnQuery(input$text.column.6)
-      newNode <- getNode(ServerValues$data, newQuery)
-      ServerValues$nodes[6, ] <- newNode
-      ServerValues$col_list[[6]] <- getColumn(ServerValues$data, newNode, 6) 
+      ServerValues <- updateAll(ServerValues, input$text.column.6, 6) 
       #ServerValues$edges <- getEdges(ServerValues$data, ServerValues$nodes, ServerValues$edge_colnames)
       #ServerValues$network <- getNetwork(ServerValues$nodes, ServerValues$edges)
       updateComplete()
@@ -313,60 +295,42 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
       input$button.column.7
     }, {
       updateValues()
-      newQuery <- parseColumnQuery(input$text.column.7)
-      newNode <- getNode(ServerValues$data, newQuery)
-      ServerValues$nodes[7, ] <- newNode
-      ServerValues$col_list[[7]] <- getColumn(ServerValues$data, newNode, 7) 
+      ServerValues <- updateAll(ServerValues, input$text.column.7, 7)
       updateComplete()
     })
     observeEvent({
       input$button.column.8
     }, {
       updateValues()
-      newQuery <- parseColumnQuery(input$text.column.8)
-      newNode <- getNode(ServerValues$data, newQuery)
-      ServerValues$nodes[8, ] <- newNode
-      ServerValues$col_list[[8]] <- getColumn(ServerValues$data, newNode, 8) 
+      ServerValues <- updateAll(ServerValues, input$text.column.8, 8)
       updateComplete()
     })
     observeEvent({
       input$button.column.9
     }, {
       updateValues()
-      newQuery <- parseColumnQuery(input$text.column.9)
-      newNode <- getNode(ServerValues$data, newQuery)
-      ServerValues$nodes[9, ] <- newNode
-      ServerValues$col_list[[9]] <- getColumn(ServerValues$data, newNode, 9) 
+      ServerValues <- updateAll(ServerValues, input$text.column.9, 9)
       updateComplete()
     })
     observeEvent({
       input$button.column.10
     }, {
       updateValues()
-      newQuery <- parseColumnQuery(input$text.column.10)
-      newNode <- getNode(ServerValues$data, newQuery)
-      ServerValues$nodes[10, ] <- newNode
-      ServerValues$col_list[[10]] <- getColumn(ServerValues$data, newNode, 10) 
+      ServerValues <- updateAll(ServerValues, input$text.column.10, 10)
       updateComplete()
     })
     observeEvent({
       input$button.column.11
     }, {
       updateValues()
-      newQuery <- parseColumnQuery(input$text.column.11)
-      newNode <- getNode(ServerValues$data, newQuery)
-      ServerValues$nodes[11, ] <- newNode
-      ServerValues$col_list[[11]] <- getColumn(ServerValues$data, newNode, 11) 
+      ServerValues <- updateAll(ServerValues, input$text.column.11, 11)
       updateComplete()
     })
     observeEvent({
       input$button.column.12
     }, {
       updateValues()
-      newQuery <- parseColumnQuery(input$text.column.12)
-      newNode <- getNode(ServerValues$data, newQuery)
-      ServerValues$nodes[12, ] <- newNode
-      ServerValues$col_list[[12]] <- getColumn(ServerValues$data, newNode, 12) 
+      ServerValues <- updateAll(ServerValues, input$text.column.12, 12)
       updateComplete()
     })
     
@@ -422,3 +386,12 @@ campfireUI = function(controller, wall, floor, datamonitor, urlmonitor) {
   
   return(ui)
   }
+
+
+updateAll <- function(serverValues, queryString, colNum) {
+  newQuery <- parseColumnQuery(queryString)
+  newNode <- getNode(serverValues$data, newQuery)
+  serverValues$nodes[colNum, ] <- newNode
+  serverValues$col_list[[colNum]] <- getColumn(serverValues$data, newNode, colNum) 
+  return(serverValues)
+}

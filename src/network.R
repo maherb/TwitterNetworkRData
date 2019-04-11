@@ -123,6 +123,7 @@ getNode <- function(data, node_query)
     node_orig_indices <- unlist(node_subset$orig_index)
   }
   node <- data.frame(id = node_query$query$q,
+                     label = node_query$name,
                      color = color.blue,
                      font = paste0("10px arial ", color.white),
                      value = node_value,

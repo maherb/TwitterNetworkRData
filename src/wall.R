@@ -48,8 +48,10 @@ UpdateColumn <- function(data_subset, current_node_data, queries, col_num) {
   column(width = 1,
          tags$div(includeCSS("wall.css"),
                   #textInput(paste0("text.column.", col_num), label = ""),
-                  #actionButton(paste0("button.column.", col_num), "Submit")),
-                  fluidRow(tags$h2(tags$span(class = "clickable", header_text))),
+                  #actionButton(paste0("button.column.", col_num), "Submit"),
+                  fluidRow(
+                    tags$h2(tags$span(class = "clickable", header_text))
+                  ),
                   fluidRow(style = 'height: 600px;
                   overflow-y: auto;
                   overflow-x: hidden;',
