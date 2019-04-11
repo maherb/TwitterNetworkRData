@@ -334,6 +334,103 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
       updateComplete()
     })
     
+    # editing column labels
+    observeEvent({
+      input$button.label.column.1
+    }, {
+      updateValues()
+      ServerValues <- editLabel(ServerValues, input$text.label.column.1, 1)
+      updateComplete()
+    })
+    
+    observeEvent({
+      input$button.label.column.2
+    }, {
+      updateValues()
+      ServerValues <- editLabel(ServerValues, input$text.label.column.2, 2)
+      updateComplete()
+    })
+    
+    observeEvent({
+      input$button.label.column.3
+    }, {
+      updateValues()
+      ServerValues <- editLabel(ServerValues, input$text.label.column.3, 3)
+      updateComplete()
+    })
+    
+    observeEvent({
+      input$button.label.column.4
+    }, {
+      updateValues()
+      ServerValues <- editLabel(ServerValues, input$text.label.column.4, 4)
+      updateComplete()
+    })
+    
+    observeEvent({
+      input$button.label.column.5
+    }, {
+      updateValues()
+      ServerValues <- editLabel(ServerValues, input$text.label.column.5, 5)
+      updateComplete()
+    })
+    
+    observeEvent({
+      input$button.label.column.6
+    }, {
+      updateValues()
+      ServerValues <- editLabel(ServerValues, input$text.label.column.6, 6)
+      updateComplete()
+    })
+    
+    observeEvent({
+      input$button.label.column.7
+    }, {
+      updateValues()
+      ServerValues <- editLabel(ServerValues, input$text.label.column.7, 7)
+      updateComplete()
+    })
+    
+    observeEvent({
+      input$button.label.column.8
+    }, {
+      updateValues()
+      ServerValues <- editLabel(ServerValues, input$text.label.column.8, 8)
+      updateComplete()
+    })
+    
+    observeEvent({
+      input$button.label.column.9
+    }, {
+      updateValues()
+      ServerValues <- editLabel(ServerValues, input$text.label.column.9, 9)
+      updateComplete()
+    })
+    
+    observeEvent({
+      input$button.label.column.10
+    }, {
+      updateValues()
+      ServerValues <- editLabel(ServerValues, input$text.label.column.10, 10)
+      updateComplete()
+    })
+    
+    observeEvent({
+      input$button.label.column.11
+    }, {
+      updateValues()
+      ServerValues <- editLabel(ServerValues, input$text.label.column.11, 11)
+      updateComplete()
+    })
+    
+    observeEvent({
+      input$button.label.column.12
+    }, {
+      updateValues()
+      ServerValues <- editLabel(ServerValues, input$text.label.column.12, 12)
+      updateComplete()
+    })
+    
     serverFunct(ServerValues, output, session)
     
   })
@@ -393,5 +490,12 @@ updateAll <- function(serverValues, queryString, colNum) {
   newNode <- getNode(serverValues$data, newQuery)
   serverValues$nodes[colNum, ] <- newNode
   serverValues$col_list[[colNum]] <- getColumn(serverValues$data, newNode, colNum) 
+  return(serverValues)
+}
+
+editLabel <- function(serverValues, newLabel, colNum) {
+  serverValues$nodes[colNum, ]$label <- newLabel
+  # TODO need more performant way to change the h2 in the column
+  serverValues$col_list[[colNum]] <- getColumn(serverValues$data, serverValues$nodes[colNum, ], colNum)
   return(serverValues)
 }
