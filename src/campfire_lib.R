@@ -11,6 +11,8 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
                                  # data_subset = NULL,
                                  # type = "none")
   
+  ServerValues$hideColumnLabelEdit <- rep(TRUE, 12)
+  
   campfire_server <- shinyServer(function(input, output, session) 
     {
     
@@ -54,7 +56,7 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
             incProgress(.2, detail = "Creating Network...", session = d)
             ServerValues$network <- getNetwork(ServerValues$nodes, ServerValues$edges)
             incProgress(.2, detail = "Creating Wall...", session = d)
-            ServerValues$col_list <- updateWall(ServerValues$data, ServerValues$nodes)
+            ServerValues$col_list <- updateWall(ServerValues$data, ServerValues$nodes, ServerValues$hideColumnLabelEdit)
             incProgress(.2, detail = "Finished", session = d)
           },
           error=function(err) {
@@ -489,13 +491,28 @@ updateAll <- function(serverValues, queryString, colNum) {
   newQuery <- parseColumnQuery(queryString)
   newNode <- getNode(serverValues$data, newQuery)
   serverValues$nodes[colNum, ] <- newNode
-  serverValues$col_list[[colNum]] <- getColumn(serverValues$data, newNode, colNum) 
+  serverValues$col_list[[colNum]] <- getColumn(serverValues$data, newNode, colNum, serverValues$hideColumnLabelEdit) 
   return(serverValues)
 }
 
+getH2 <- function(string) {
+  begin <- regexpr("<h2", string)[[1]]
+  end <- regexpr("</h2", string)[[1]]+4
+  return(substr(string, begin, end))
+}
+
 editLabel <- function(serverValues, newLabel, colNum) {
-  serverValues$nodes[colNum, ]$label <- newLabel
-  # TODO need more performant way to change the h2 in the column
-  serverValues$col_list[[colNum]] <- getColumn(serverValues$data, serverValues$nodes[colNum, ], colNum)
+  # if the label box is not hidden AND the new label is not the old label
+  if ((!serverValues$hideColumnLabelEdit[colNum])) {
+    if (serverValues$nodes[colNum, ]$label != newLabel) {
+      serverValues$nodes[colNum, ]$label <- newLabel
+      oldHeader <- getH2(serverValues$col_list[[colNum]])
+      oldColumn <- serverValues$col_list[[colNum]]
+      newHeader <- h2(newLabel)
+      newColumn <- sub(oldHeader, newHeader, oldColumn)
+      serverValues$col_list[[colNum]] <- newColumn
+    }
+  }
+  serverValues$hideColumnLabelEdit[colNum] <- !serverValues$hideColumnLabelEdit[colNum]
   return(serverValues)
 }

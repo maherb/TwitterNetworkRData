@@ -1,6 +1,6 @@
 # Only call when update on controller is pressed, update every column on the
 # wall sequentially. There will only be gaps at the end
-updateWall <- function(data, nodes) {
+updateWall <- function(data, nodes, hideColumnLabelEdit) {
   # Creates the output displayed on the campfire wall of tweet columns.
   # 
   # Args:
@@ -17,7 +17,7 @@ updateWall <- function(data, nodes) {
     }
     else
     {
-      getColumn(data, nodes[col_num, ], col_num)
+      getColumn(data, nodes[col_num, ], col_num, hideColumnLabelEdit[col_num])
     }
   })
   col_list
@@ -29,12 +29,12 @@ getEmptyColumn <- function(col_num) {
          actionButton(paste0("button.column.", col_num), "Submit"))
 }
 
-getColumn <- function(data, current_node_data, col_num) {
+getColumn <- function(data, current_node_data, col_num, hideColumnLabelEdit) {
   data_subset <- getSubset(data, list(q = current_node_data$id, colname = current_node_data$colname))
-  UpdateColumn(data_subset, current_node_data, nodes$id, col_num)
+  UpdateColumn(data_subset, current_node_data, nodes$id, col_num, hideColumnLabelEdit)
 }
 
-UpdateColumn <- function(data_subset, current_node_data, queries, col_num) {
+UpdateColumn <- function(data_subset, current_node_data, queries, col_num, hideColumnLabelEdit) {
   # Creates a single Shiny HTMl column containing tweet data for specific single query.
   # 
   # Args:
@@ -52,7 +52,9 @@ UpdateColumn <- function(data_subset, current_node_data, queries, col_num) {
                   fluidRow(
                     tags$h2(tags$span(class = "clickable", header_text))
                   ),
-                  textInput(paste0("text.label.column.", col_num), label = "", value = header_text),
+                  if (!hideColumnLabelEdit) {
+                    textInput(paste0("text.label.column.", col_num), label = "", value = header_text)
+                  },
                   actionButton(paste0("button.label.column.", col_num), "Edit label"),
                   fluidRow(style = 'height: 600px;
                   overflow-y: auto;
