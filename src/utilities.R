@@ -46,8 +46,8 @@ parseColumnQuery <- function(string) {
 
 createNodeQuery <- function(q, colname, name)
 {
-  query <- structure(list(q = q, colname = colname), class = "Query")
-  node_query <- structure(list(query = query, name = name), class = "NodeQuery")
+  query <- structure(list(q = q, colname = colname))
+  node_query <- structure(list(query = query, name = name))
   node_query
 }
 

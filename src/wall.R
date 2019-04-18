@@ -58,7 +58,9 @@ UpdateColumn <- function(data_subset, current_node_data, queries, col_num) {
                   overflow-y: auto;
                   overflow-x: hidden;',
                            if(nrow(data_subset) > 0) {
-                             lapply(1:nrow(data_subset), makeRow(data_subset))
+                             #lapply(1:nrow(data_subset), makeRow(data_subset))
+                             lapply(1:25, makeRow(data_subset))
+                             
                            }
                   )
          )

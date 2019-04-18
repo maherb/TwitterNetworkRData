@@ -51,6 +51,7 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
             ServerValues$nodes <- getNodes(ServerValues$data, parsed_json$nodes)
             incProgress(.2, detail = "Creating Edges...", session = d)
             ServerValues$edges <- getEdges(ServerValues$data, parsed_json$nodes, ServerValues$edge_colnames, ServerValues$nodes)
+            print("We got the graph")
             incProgress(.2, detail = "Creating Network...", session = d)
             ServerValues$network <- getNetwork(ServerValues$nodes, ServerValues$edges)
             incProgress(.2, detail = "Creating Wall...", session = d)
@@ -489,6 +490,33 @@ updateAll <- function(serverValues, queryString, colNum) {
   newQuery <- parseColumnQuery(queryString)
   newNode <- getNode(serverValues$data, newQuery)
   serverValues$nodes[colNum, ] <- newNode
+  serverValues$nodes <- updatePositions(serverValues$nodes)
+  nextId <- max(serverValues$edges$id)+1
+  for (i in 1:nrow(serverValues$nodes)) {
+    if (!is.na(serverValues$nodes$id[i])) {
+      if (serverValues$nodes$id[i] != newNode$id) {
+        oldQuery <- createNodeQuery(q = serverValues$nodes$query.query.q[i], 
+                                    colname = serverValues$nodes$query.query.colname[i], 
+                                    name = serverValues$nodes$query.name[i])
+        
+        rounds <- seq(0, .5, length.out = length(serverValues$edge_colnames))
+        edge_colors <- c("#c51f5d", "white", "#008080")
+        for (i in 1:length(serverValues$edge_colnames)) {
+          newEdge <- getEdge(data = serverValues$data, 
+                             to_query = newQuery$query, 
+                             from_query = oldQuery$query, 
+                             colname = serverValues$edge_colnames[[i]], 
+                             nodes = serverValues$nodes,
+                             edge_color = edge_colors[[i]], 
+                             edge_rounds = rounds[[i]],
+                             edge_id = nextId)
+          nextId <- nextId + 1
+          serverValues$edges <- rbind(serverValues$edges, newEdge)
+        }
+      }
+    }
+  }
+  serverValues$network <- getNetwork(serverValues$nodes, serverValues$edges)
   serverValues$col_list[[colNum]] <- getColumn(serverValues$data, newNode, colNum) 
   return(serverValues)
 }

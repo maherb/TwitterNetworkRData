@@ -132,7 +132,8 @@ getNode <- function(data, node_query)
                      colname = node_query$query$colname,
                      colvalue = node_query$query$q,
                      hidden = is.na(node_value),
-                     stringsAsFactors = FALSE)
+                     stringsAsFactors = FALSE,
+                     query = node_query)
   node$orig_indices <- list(node_orig_indices)
   node
 }
@@ -181,7 +182,6 @@ getNodes <- function(data, node_queries)
 #' @return Subset of data containing rows from to_query, from_query that share common colname content.
 getEdgeSubset <- function(data, to_query, from_query, colname, nodes)
 {
-  #print(paste0("starting", count))
   node1_indices <- nodes$orig_indices[nodes$id == to_query$q][[1]]
   node2_indices <- nodes$orig_indices[nodes$id == from_query$q][[1]]
   # node1_indices <- node1_indices$orig_indices
@@ -193,7 +193,6 @@ getEdgeSubset <- function(data, to_query, from_query, colname, nodes)
   from_content <- unique(unlist(from_node_subset[ , colname]))
   shared_content <- intersect(to_content, from_content)
   tmps <- vector(mode = "list", length = length(shared_content))
-  #print(paste0("ending", count))
   count <<- count + 1
   if(length(shared_content > 0))
   {
@@ -214,7 +213,7 @@ getEdgeSubset <- function(data, to_query, from_query, colname, nodes)
 #' @param from_query Query representing the end node.
 #' @param colname Column name to search in to create edges.
 #' @return Edge data frame to to_query from from_query.
-getEdge <- function(data, to_query, from_query, colname, nodes)
+getEdge <- function(data, to_query, from_query, colname, nodes, edge_color, edge_rounds, edge_id)
 {
   size <- 0
   edge_subset <- getEdgeSubset(data, to_query, from_query, colname, nodes)
@@ -225,6 +224,10 @@ getEdge <- function(data, to_query, from_query, colname, nodes)
   edge <- data.frame(to = to_query$q,
                      from = from_query$q,
                      value = size)
+  edge$colname <- colname
+  edge$color <- edge_color
+  edge$smooth <- list(list("type" = "continuous", "roundness" = edge_rounds))
+  edge$id <- edge_id
   edge
 }
 
@@ -244,6 +247,7 @@ getEdges <- function(data, node_queries, edge_colnames, nodes)
   node_combinations <- combn(1:length(subset_queries), 2)
   rounds <- seq(0, .5, length.out = length(edge_colnames))
   edge_colors <- c("#c51f5d", "white", "#008080")
+  next_id <- 1
   for(i in 1:ncol(node_combinations))
   {
     if(!is.na(subset_queries[[node_combinations[ ,i][1]]]) && !is.na(subset_queries[[node_combinations[ ,i][2]]]))
@@ -254,15 +258,16 @@ getEdges <- function(data, node_queries, edge_colnames, nodes)
                         subset_queries[[node_combinations[ ,i][1]]],
                         subset_queries[[node_combinations[ ,i][2]]],
                         edge_colnames[[j]],
-                        nodes)
-        edge$colname <- edge_colnames[[j]]
-        edge$color <- edge_colors[[j]]
-        edge$smooth <- list(list("type" = "continuous", "roundness" = rounds[[j]]))
+                        nodes,
+                        edge_colors[[j]],
+                        rounds[[j]],
+                        next_id)
+        next_id <- next_id + 1
+        
         edges <- rbind(edges, edge)
       }
     }
   }
-  edges$id <- 1:nrow(edges)
   edges
 }
 
