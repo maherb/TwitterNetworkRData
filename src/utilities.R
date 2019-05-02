@@ -27,6 +27,11 @@ parseQueryTerm <- function(string) {
     mentionText <- substring(string, 2)
     return(list(q = mentionText, colname = "user_mentions"))
   }
+  # handle groups with group:1
+  if (substring(string, 1, nchar("group:")) == "group:") {
+    groupText <- substring(string, nchar("group:")+1)
+    return(list(q = groupText, colname = "group"))
+  }
   # could not recognize the query term
   return(NULL)
 }
