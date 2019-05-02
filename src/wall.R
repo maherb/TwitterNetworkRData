@@ -34,7 +34,7 @@ getColumn <- function(data, current_node_data, col_num) {
   UpdateColumn(data_subset, current_node_data, nodes$id, col_num)
 }
 
-UpdateColumn <- function(data_subset, current_node_data, queries, col_num) {
+UpdateColumn <- function(data_subset, current_node_data, queries, col_num, header_at_top = FALSE, demo_mode = TRUE) {
   # Creates a single Shiny HTMl column containing tweet data for specific single query.
   # 
   # Args:
@@ -49,21 +49,27 @@ UpdateColumn <- function(data_subset, current_node_data, queries, col_num) {
          tags$div(includeCSS("wall.css"),
                   #textInput(paste0("text.column.", col_num), label = ""),
                   #actionButton(paste0("button.column.", col_num), "Submit"),
-                  fluidRow(
-                    tags$h2(tags$span(class = "clickable", header_text))
-                  ),
+                  makeHeader(header_text),
                   textInput(paste0("text.label.column.", col_num), label = "", value = header_text),
                   actionButton(paste0("button.label.column.", col_num), "Edit label"),
                   fluidRow(style = 'height: 600px;
                   overflow-y: auto;
                   overflow-x: hidden;',
                            if(nrow(data_subset) > 0) {
-                             #lapply(1:nrow(data_subset), makeRow(data_subset))
-                             lapply(1:25, makeRow(data_subset))
-                             
+                             if (demo_mode) {
+                               lapply(1:25, makeRow(data_subset))
+                             } else {
+                               lapply(1:nrow(data_subset), makeRow(data_subset))
+                             }
                            }
                   )
          )
+  )
+}
+
+makeHeader <- function(headerText) {
+  fluidRow(
+    tags$h2(tags$span(class = "clickable", headerText))
   )
 }
 
