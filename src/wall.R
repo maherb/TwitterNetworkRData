@@ -45,13 +45,12 @@ UpdateColumn <- function(data_subset, current_node_data, queries, col_num, heade
   # Returns:
   #   List of Shiny html columns containing tweet data.
   header_text <- current_node_data$label
+  print(current_node_data$query.repr)
   column(width = 1,
          tags$div(includeCSS("wall.css"),
-                  #textInput(paste0("text.column.", col_num), label = ""),
-                  #actionButton(paste0("button.column.", col_num), "Submit"),
                   makeHeader(header_text),
-                  textInput(paste0("text.label.column.", col_num), label = "", value = header_text),
-                  actionButton(paste0("button.label.column.", col_num), "Edit label"),
+                  textInput(paste0("text.column.", col_num), label = "", value = current_node_data$query.repr),
+                  actionButton(paste0("button.column.", col_num), "Submit"),
                   fluidRow(style = 'height: 600px;
                   overflow-y: auto;
                   overflow-x: hidden;',

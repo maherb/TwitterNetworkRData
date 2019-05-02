@@ -38,6 +38,7 @@ parseQueryTerm <- function(string) {
 
 
 parseColumnQuery <- function(string) {
+  print(string)
   # check the first thing for a label:labelname
   splitString <- strsplit(string, " ", fixed = TRUE)
   
@@ -55,55 +56,13 @@ parseColumnQuery <- function(string) {
       colnames <- c(colnames, parsedQueryTerm$colname)
     }
   } 
-  return(createNodeQuery(q = qvals, colname = colnames, name = label))  
+  return(createNodeQuery(q = qvals, colname = colnames, name = label, repr = string))  
 }
-  
-  
-  
-  # if (length(splitString) == 0 & length(splitString[[1]]) < 2) {
-  #   return(NULL)
-  # }
-  # colname <- splitString[[1]][1]
-  # value <- splitString[[1]][2]
-  # 
-  # 
-  # 
-  # if (substring(string, 1, 1) == "#") {
-  #   hashtagText <- substring(string, 2)
-  #   query <- createNodeQuery(hashtagText, "hashtags", string)
-  #   return(query)
-  # }
-  # if (substring(string, 1, 1) == "@") {
-  #   mentionText <- substring(string, 2)
-  #   query <- createNodeQuery(mentionText, "user_screen_name", string)
-  #   return(query)
-  # }
-  # if (grepl(" ", string)) {
-  #   splitString <- strsplit(string, " ", fixed = TRUE)
-  #   if (length(splitString) == 0 & length(splitString[[1]]) < 2) {
-  #     return(NULL)
-  #   }
-  #   colname <- splitString[[1]][1]
-  #   value <- splitString[[1]][2]
-  #   name <- if (length(splitString[[1]]) > 2) {
-  #     splitString[[1]][3]
-  #   } else {
-  #     string
-  #   }
-  #   if (colname %in% c("mention", "mentions")) {
-  #     query <- createNodeQuery(value, "user_mentions", name)
-  #     return(query)
-  #   }
-  #   query <- createNodeQuery(value, colname, name)
-  #   return(query)
-  # }
-  # return(NULL)
-#}
 
-createNodeQuery <- function(q, colname, name)
+createNodeQuery <- function(q, colname, name, repr)
 {
   query <- structure(list(q = q, colname = colname))
-  node_query <- structure(list(query = query, name = name))
+  node_query <- structure(list(query = query, name = name, repr = repr))
   node_query
 }
 

@@ -48,10 +48,20 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
             ServerValues$data <- fetchData(parsed_json$data_file)
             ServerValues$edge_colnames <- parsed_json$edge_colnames
             incProgress(.2, detail = "Creating Nodes...", session = d)
-            ServerValues$nodes <- getNodes(ServerValues$data, parsed_json$nodes)
+            columnQueries <- lapply(parsed_json$nodes, function(query) {
+              if (query != "") {
+                parseColumnQuery(query)
+              }
+              else {
+                createNodeQuery(NA, NA, NA, NA)
+              }
+            })
+            print("Loaded queries")
+            ServerValues$nodes <- getNodes(ServerValues$data, columnQueries)
+            print("Got nodes")
             incProgress(.2, detail = "Creating Edges...", session = d)
-            ServerValues$edges <- getEdges(ServerValues$data, parsed_json$nodes, ServerValues$edge_colnames, ServerValues$nodes)
-            print("We got the graph")
+            ServerValues$edges <- getEdges(ServerValues$data, columnQueries, ServerValues$edge_colnames, ServerValues$nodes)
+            print("Got edges")
             incProgress(.2, detail = "Creating Network...", session = d)
             ServerValues$network <- getNetwork(ServerValues$nodes, ServerValues$edges)
             incProgress(.2, detail = "Creating Wall...", session = d)
@@ -335,102 +345,7 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
       updateComplete()
     })
     
-    # editing column labels
-    observeEvent({
-      input$button.label.column.1
-    }, {
-      updateValues()
-      ServerValues <- editLabel(ServerValues, input$text.label.column.1, 1)
-      updateComplete()
-    })
-    
-    observeEvent({
-      input$button.label.column.2
-    }, {
-      updateValues()
-      ServerValues <- editLabel(ServerValues, input$text.label.column.2, 2)
-      updateComplete()
-    })
-    
-    observeEvent({
-      input$button.label.column.3
-    }, {
-      updateValues()
-      ServerValues <- editLabel(ServerValues, input$text.label.column.3, 3)
-      updateComplete()
-    })
-    
-    observeEvent({
-      input$button.label.column.4
-    }, {
-      updateValues()
-      ServerValues <- editLabel(ServerValues, input$text.label.column.4, 4)
-      updateComplete()
-    })
-    
-    observeEvent({
-      input$button.label.column.5
-    }, {
-      updateValues()
-      ServerValues <- editLabel(ServerValues, input$text.label.column.5, 5)
-      updateComplete()
-    })
-    
-    observeEvent({
-      input$button.label.column.6
-    }, {
-      updateValues()
-      ServerValues <- editLabel(ServerValues, input$text.label.column.6, 6)
-      updateComplete()
-    })
-    
-    observeEvent({
-      input$button.label.column.7
-    }, {
-      updateValues()
-      ServerValues <- editLabel(ServerValues, input$text.label.column.7, 7)
-      updateComplete()
-    })
-    
-    observeEvent({
-      input$button.label.column.8
-    }, {
-      updateValues()
-      ServerValues <- editLabel(ServerValues, input$text.label.column.8, 8)
-      updateComplete()
-    })
-    
-    observeEvent({
-      input$button.label.column.9
-    }, {
-      updateValues()
-      ServerValues <- editLabel(ServerValues, input$text.label.column.9, 9)
-      updateComplete()
-    })
-    
-    observeEvent({
-      input$button.label.column.10
-    }, {
-      updateValues()
-      ServerValues <- editLabel(ServerValues, input$text.label.column.10, 10)
-      updateComplete()
-    })
-    
-    observeEvent({
-      input$button.label.column.11
-    }, {
-      updateValues()
-      ServerValues <- editLabel(ServerValues, input$text.label.column.11, 11)
-      updateComplete()
-    })
-    
-    observeEvent({
-      input$button.label.column.12
-    }, {
-      updateValues()
-      ServerValues <- editLabel(ServerValues, input$text.label.column.12, 12)
-      updateComplete()
-    })
+  
     
     serverFunct(ServerValues, output, session)
     
@@ -518,12 +433,5 @@ updateAll <- function(serverValues, queryString, colNum) {
   }
   serverValues$network <- getNetwork(serverValues$nodes, serverValues$edges)
   serverValues$col_list[[colNum]] <- getColumn(serverValues$data, newNode, colNum) 
-  return(serverValues)
-}
-
-editLabel <- function(serverValues, newLabel, colNum) {
-  serverValues$nodes[colNum, ]$label <- newLabel
-  # TODO need more performant way to change the h2 in the column
-  serverValues$col_list[[colNum]] <- getColumn(serverValues$data, serverValues$nodes[colNum, ], colNum)
   return(serverValues)
 }

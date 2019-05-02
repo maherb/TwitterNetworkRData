@@ -29,8 +29,10 @@ fetchData <- function(Rdata_file) {
 #' @param data Dataframe with tweet data.
 #' @param subset_query Query object to subset from. 
 #' @return Subset of main data based on query and type.
-getSubset <- function(data, subset_query)
-{
+getSubset <- function(data, subset_query) {
+  if (is.na(subset_query$q) | is.na(subset_query$colname)) {
+    return(NULL)
+  }
   if(subset_query$colname %in% colnames(data)) {
     contains <- sapply(1:nrow(data), function(i) {
       if (is.vector(subset_query$q)) {
@@ -165,6 +167,7 @@ getNode <- function(data, node_query)
     node_value <- nrow(node_subset)
     node_orig_indices <- unlist(node_subset$orig_index)
   }
+  print(node_query)
   node <- data.frame(id = node_query$query$q,
                      label = node_query$name,
                      color = color.blue,
