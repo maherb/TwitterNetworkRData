@@ -38,7 +38,6 @@ parseQueryTerm <- function(string) {
 
 
 parseColumnQuery <- function(string) {
-  print(string)
   # check the first thing for a label:labelname
   splitString <- strsplit(string, " ", fixed = TRUE)
   
