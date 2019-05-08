@@ -32,6 +32,11 @@ parseQueryTerm <- function(string) {
     groupText <- substring(string, nchar("group:")+1)
     return(list(q = groupText, colname = "group"))
   }
+  # handle groups with url:https://vine.co/v/O1MqgVMahwp
+  if (substring(string, 1, nchar("url:")) == "url:") {
+    urlText <- substring(string, nchar("url:")+1)
+    return(list(q = urlText, colname = "expanded_urls"))
+  }
   # could not recognize the query term
   return(NULL)
 }

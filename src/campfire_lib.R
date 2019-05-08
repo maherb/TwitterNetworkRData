@@ -46,6 +46,7 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
             incProgress(0, detail = "Getting Data...", session = d)
             parsed_json <- fromJSON(fp, nullValue = NA, simplify = FALSE)
             ServerValues$data <- fetchData(parsed_json$data_file)
+            ServerValues$url_map <- getUrlMap(ServerValues$data)
             ServerValues$edge_colnames <- parsed_json$edge_colnames
             incProgress(.2, detail = "Creating Nodes...", session = d)
             columnQueries <- lapply(parsed_json$nodes, function(query) {
@@ -196,6 +197,17 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
     #     }
     #   } else {
     #     serverValues$url <- input$clicked_text
+      } 
+      else {
+        if (!is.na(ServerValues$url_map[input$clicked_text])) {
+          openColumns <- which(is.na(ServerValues$nodes$id))
+          if (length(openColumns) > 0) {
+            colNum <- openColumns[1]
+            expandedUrl <- as.character(ServerValues$url_map[input$clicked_text])
+            queryString <- paste0("label:", expandedUrl, " url:", expandedUrl)
+            ServerValues <- updateAll(ServerValues, queryString, colNum)
+          }
+        }  
       }
     })
     # 

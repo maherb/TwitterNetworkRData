@@ -20,17 +20,20 @@ fetchData <- function(Rdata_file) {
   })
   # Add column to track row of tweet in main dataframe.
   data$orig_index <- 1:nrow(data)
+  remove(df_name)
+  return(data)
+}
+
+getUrlMap <- function(data) {
   url_map <- c()
   for (i in 1:nrow(data)) {
     for (j in 1:length(data$expanded_urls[i])) {
       url <- unlist(data$urls[i])[j]
-      expanded_url <- data$expanded_urls[i][[j]]
+      expanded_url <- unlist(data$expanded_urls[i])[j]
       url_map[url] <- expanded_url 
     }
   }
-  data$url_map <- url_map
-  remove(df_name)
-  return(data)
+  return(url_map)  
 }
 
 #' Gets subset of data.
