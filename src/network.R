@@ -24,6 +24,18 @@ fetchData <- function(Rdata_file) {
   return(data)
 }
 
+getUrlMap <- function(data) {
+  url_map <- c()
+  for (i in 1:nrow(data)) {
+    for (j in 1:length(data$expanded_urls[i])) {
+      url <- unlist(data$urls[i])[j]
+      expanded_url <- unlist(data$expanded_urls[i])[j]
+      url_map[url] <- expanded_url 
+    }
+  }
+  return(url_map)  
+}
+
 #' Gets subset of data.
 #'
 #' @param data Dataframe with tweet data.
@@ -167,7 +179,6 @@ getNode <- function(data, node_query)
     node_value <- nrow(node_subset)
     node_orig_indices <- unlist(node_subset$orig_index)
   }
-  print(node_query)
   node <- data.frame(id = node_query$query$q,
                      label = node_query$name,
                      color = color.blue,

@@ -46,6 +46,7 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
             incProgress(0, detail = "Getting Data...", session = d)
             parsed_json <- fromJSON(fp, nullValue = NA, simplify = FALSE)
             ServerValues$data <- fetchData(parsed_json$data_file)
+            ServerValues$url_map <- getUrlMap(ServerValues$data)
             ServerValues$edge_colnames <- parsed_json$edge_colnames
             incProgress(.2, detail = "Creating Nodes...", session = d)
             columnQueries <- lapply(parsed_json$nodes, function(query) {
@@ -56,12 +57,9 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
                 createNodeQuery(NA, NA, NA, NA)
               }
             })
-            print("Loaded queries")
             ServerValues$nodes <- getNodes(ServerValues$data, columnQueries)
-            print("Got nodes")
             incProgress(.2, detail = "Creating Edges...", session = d)
             ServerValues$edges <- getEdges(ServerValues$data, columnQueries, ServerValues$edge_colnames, ServerValues$nodes)
-            print("Got edges")
             incProgress(.2, detail = "Creating Network...", session = d)
             ServerValues$network <- getNetwork(ServerValues$nodes, ServerValues$edges)
             incProgress(.2, detail = "Creating Wall...", session = d)
@@ -170,13 +168,19 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
     })
 
     # # Observe when text on the wall is clicked, and update query and wall/floor
-    # observeEvent(input$clicked_text, {
+    observeEvent(input$clicked_text, {
     #   # Determine what was clicked on the wall and update the appropriate values.
     #   #
     #   # Event:
     #   #   Text is clicked on the wall.
-    #   updateValues()
-    #   if(substr(serverValues$clicked_text, 1, 1) == "#" ||  substr(serverValues$clicked_text, 1, 1) == "@") {
+      updateValues()
+      if(substr(input$clicked_text, 1, 1) == "#" ||  substr(input$clicked_text, 1, 1) == "@") {
+        openColumns <- which(is.na(ServerValues$nodes$id))
+        if (length(openColumns) > 0) {
+          colNum <- openColumns[1]
+          queryString <- paste0("label:",input$clicked_text, " ", input$clicked_text)
+          ServerValues <- updateAll(ServerValues, queryString, colNum)
+        }
     #     if(toupper(serverValues$clicked_text) %in% toupper(serverValues$queries)) {
     #       index <- which(toupper(serverValues$queries) %in% toupper(serverValues$clicked_text))
     #       text <- serverValues$queries[index]
@@ -193,8 +197,19 @@ campfireApp = function(controller = NA, wall = NA, floor = NA, datamonitor = NA,
     #     }
     #   } else {
     #     serverValues$url <- input$clicked_text
-    #   }
-    # })
+      } 
+      else {
+        if (!is.na(ServerValues$url_map[input$clicked_text])) {
+          openColumns <- which(is.na(ServerValues$nodes$id))
+          if (length(openColumns) > 0) {
+            colNum <- openColumns[1]
+            expandedUrl <- as.character(ServerValues$url_map[input$clicked_text])
+            queryString <- paste0("label:", expandedUrl, " url:", expandedUrl)
+            ServerValues <- updateAll(ServerValues, queryString, colNum)
+          }
+        }  
+      }
+    })
     # 
     # observeEvent(input$end_position, {
     #   # Change column positions based on moved nodes.
@@ -412,7 +427,8 @@ updateAll <- function(serverValues, queryString, colNum) {
       if (serverValues$nodes$id[i] != newNode$id) {
         oldQuery <- createNodeQuery(q = serverValues$nodes$query.query.q[i], 
                                     colname = serverValues$nodes$query.query.colname[i], 
-                                    name = serverValues$nodes$query.name[i])
+                                    name = serverValues$nodes$query.name[i],
+                                    repr = queryString)
         
         rounds <- seq(0, .5, length.out = length(serverValues$edge_colnames))
         edge_colors <- c("#c51f5d", "white", "#008080")
